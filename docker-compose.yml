@@ -1,0 +1,11 @@
+services:
+  recruitment-backend:
+    build:
+      context: .
+      target: development
+    restart: always
+    ports:
+      - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
+    volumes:
+      - .:/app
+      - /app/node_modules
