@@ -7,8 +7,8 @@ Development mode:
 
     docker compose up -d --build
 
-"Production" mode:
+Pre-production mode:
 
-    docker compose -f docker-compose.prod.yml up --build
+    docker compose -f docker-compose.preprod.yml up --build
 
 Note that you can change the port exposed by the container by setting the environment variable BACKEND_PORT in a .env file in the root directory of the project.

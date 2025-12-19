@@ -17,12 +17,13 @@ services:
   recruitment-backend:
     build:
       context: .
-      target: development
+      # target: development
+      target: production
     restart: always
     ports:
       - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
-    volumes:
-      - .:/app
-      - /app/node_modules
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
 volumes:
   recruitment_db:
