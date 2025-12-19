@@ -3,7 +3,8 @@ services:
     image: mysql:8.0
     restart: always
     env_file:
-      - .env
+      # - .env
+      - preprod.env
     environment:
       - MYSQL_DATABASE=${DATABASE_NAME}
       - MYSQL_USER=${DATABASE_USER}
