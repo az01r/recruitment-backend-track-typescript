@@ -15,6 +15,10 @@ services:
     volumes:
       - recruitment_db:/var/lib/mysql
       - ./init-db-permission.sh:/docker-entrypoint-initdb.d/init-db-permission.sh
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
   recruitment-backend:
     build:
       context: .
@@ -22,7 +26,8 @@ services:
       target: production
     restart: always
     depends_on:
-      - recruitment-db
+      recruitment-db:
+        condition: service_healthy
     ports:
       - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
     # volumes:
