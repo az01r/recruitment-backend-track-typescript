@@ -3,6 +3,6 @@ import "dotenv/config";
 
 export const jwtSign = (userId: string) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET!, {
-    expiresIn: "1h",
+    expiresIn: (process.env.JWT_DURATION || "4h") as jwt.SignOptions["expiresIn"],
   });
 };

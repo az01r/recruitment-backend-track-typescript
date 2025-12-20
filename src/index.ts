@@ -7,11 +7,8 @@ import errorRouter from "./middlewares/error-route.js";
 import userRouter from "./routers/user-router.js";
 import taxProfileRouter from "./routers/tax-profile-router.js";
 import invoiceRouter from "./routers/invoice-router.js";
-import { checkDbConnection } from "./utils/check-db-connection.js";
 
 const app = express();
-
-await checkDbConnection();
 
 app.use(express.json());
 
