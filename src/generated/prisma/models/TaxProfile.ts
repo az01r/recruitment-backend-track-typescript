@@ -26,6 +26,12 @@ export type AggregateTaxProfile = {
 
 export type TaxProfileMinAggregateOutputType = {
   id: string | null
+  legalName: string | null
+  vatNumber: string | null
+  address: string | null
+  city: string | null
+  zipCode: string | null
+  country: string | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: string | null
@@ -33,6 +39,12 @@ export type TaxProfileMinAggregateOutputType = {
 
 export type TaxProfileMaxAggregateOutputType = {
   id: string | null
+  legalName: string | null
+  vatNumber: string | null
+  address: string | null
+  city: string | null
+  zipCode: string | null
+  country: string | null
   createdAt: Date | null
   updatedAt: Date | null
   userId: string | null
@@ -40,6 +52,12 @@ export type TaxProfileMaxAggregateOutputType = {
 
 export type TaxProfileCountAggregateOutputType = {
   id: number
+  legalName: number
+  vatNumber: number
+  address: number
+  city: number
+  zipCode: number
+  country: number
   createdAt: number
   updatedAt: number
   userId: number
@@ -49,6 +67,12 @@ export type TaxProfileCountAggregateOutputType = {
 
 export type TaxProfileMinAggregateInputType = {
   id?: true
+  legalName?: true
+  vatNumber?: true
+  address?: true
+  city?: true
+  zipCode?: true
+  country?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -56,6 +80,12 @@ export type TaxProfileMinAggregateInputType = {
 
 export type TaxProfileMaxAggregateInputType = {
   id?: true
+  legalName?: true
+  vatNumber?: true
+  address?: true
+  city?: true
+  zipCode?: true
+  country?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -63,6 +93,12 @@ export type TaxProfileMaxAggregateInputType = {
 
 export type TaxProfileCountAggregateInputType = {
   id?: true
+  legalName?: true
+  vatNumber?: true
+  address?: true
+  city?: true
+  zipCode?: true
+  country?: true
   createdAt?: true
   updatedAt?: true
   userId?: true
@@ -143,6 +179,12 @@ export type TaxProfileGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 
 export type TaxProfileGroupByOutputType = {
   id: string
+  legalName: string
+  vatNumber: string
+  address: string
+  city: string
+  zipCode: string
+  country: string
   createdAt: Date
   updatedAt: Date
   userId: string
@@ -171,6 +213,12 @@ export type TaxProfileWhereInput = {
   OR?: Prisma.TaxProfileWhereInput[]
   NOT?: Prisma.TaxProfileWhereInput | Prisma.TaxProfileWhereInput[]
   id?: Prisma.StringFilter<"TaxProfile"> | string
+  legalName?: Prisma.StringFilter<"TaxProfile"> | string
+  vatNumber?: Prisma.StringFilter<"TaxProfile"> | string
+  address?: Prisma.StringFilter<"TaxProfile"> | string
+  city?: Prisma.StringFilter<"TaxProfile"> | string
+  zipCode?: Prisma.StringFilter<"TaxProfile"> | string
+  country?: Prisma.StringFilter<"TaxProfile"> | string
   createdAt?: Prisma.DateTimeFilter<"TaxProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TaxProfile"> | Date | string
   userId?: Prisma.StringFilter<"TaxProfile"> | string
@@ -180,6 +228,12 @@ export type TaxProfileWhereInput = {
 
 export type TaxProfileOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  legalName?: Prisma.SortOrder
+  vatNumber?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  zipCode?: Prisma.SortOrder
+  country?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -193,6 +247,12 @@ export type TaxProfileWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.TaxProfileWhereInput | Prisma.TaxProfileWhereInput[]
   OR?: Prisma.TaxProfileWhereInput[]
   NOT?: Prisma.TaxProfileWhereInput | Prisma.TaxProfileWhereInput[]
+  legalName?: Prisma.StringFilter<"TaxProfile"> | string
+  vatNumber?: Prisma.StringFilter<"TaxProfile"> | string
+  address?: Prisma.StringFilter<"TaxProfile"> | string
+  city?: Prisma.StringFilter<"TaxProfile"> | string
+  zipCode?: Prisma.StringFilter<"TaxProfile"> | string
+  country?: Prisma.StringFilter<"TaxProfile"> | string
   createdAt?: Prisma.DateTimeFilter<"TaxProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TaxProfile"> | Date | string
   userId?: Prisma.StringFilter<"TaxProfile"> | string
@@ -202,6 +262,12 @@ export type TaxProfileWhereUniqueInput = Prisma.AtLeast<{
 
 export type TaxProfileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  legalName?: Prisma.SortOrder
+  vatNumber?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  zipCode?: Prisma.SortOrder
+  country?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -215,6 +281,12 @@ export type TaxProfileScalarWhereWithAggregatesInput = {
   OR?: Prisma.TaxProfileScalarWhereWithAggregatesInput[]
   NOT?: Prisma.TaxProfileScalarWhereWithAggregatesInput | Prisma.TaxProfileScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"TaxProfile"> | string
+  legalName?: Prisma.StringWithAggregatesFilter<"TaxProfile"> | string
+  vatNumber?: Prisma.StringWithAggregatesFilter<"TaxProfile"> | string
+  address?: Prisma.StringWithAggregatesFilter<"TaxProfile"> | string
+  city?: Prisma.StringWithAggregatesFilter<"TaxProfile"> | string
+  zipCode?: Prisma.StringWithAggregatesFilter<"TaxProfile"> | string
+  country?: Prisma.StringWithAggregatesFilter<"TaxProfile"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"TaxProfile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"TaxProfile"> | Date | string
   userId?: Prisma.StringWithAggregatesFilter<"TaxProfile"> | string
@@ -222,6 +294,12 @@ export type TaxProfileScalarWhereWithAggregatesInput = {
 
 export type TaxProfileCreateInput = {
   id?: string
+  legalName: string
+  vatNumber: string
+  address: string
+  city: string
+  zipCode: string
+  country: string
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutTaxProfilesInput
@@ -230,6 +308,12 @@ export type TaxProfileCreateInput = {
 
 export type TaxProfileUncheckedCreateInput = {
   id?: string
+  legalName: string
+  vatNumber: string
+  address: string
+  city: string
+  zipCode: string
+  country: string
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: string
@@ -238,6 +322,12 @@ export type TaxProfileUncheckedCreateInput = {
 
 export type TaxProfileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  legalName?: Prisma.StringFieldUpdateOperationsInput | string
+  vatNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  zipCode?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutTaxProfilesNestedInput
@@ -246,6 +336,12 @@ export type TaxProfileUpdateInput = {
 
 export type TaxProfileUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  legalName?: Prisma.StringFieldUpdateOperationsInput | string
+  vatNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  zipCode?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -254,6 +350,12 @@ export type TaxProfileUncheckedUpdateInput = {
 
 export type TaxProfileCreateManyInput = {
   id?: string
+  legalName: string
+  vatNumber: string
+  address: string
+  city: string
+  zipCode: string
+  country: string
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: string
@@ -261,12 +363,24 @@ export type TaxProfileCreateManyInput = {
 
 export type TaxProfileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  legalName?: Prisma.StringFieldUpdateOperationsInput | string
+  vatNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  zipCode?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TaxProfileUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  legalName?: Prisma.StringFieldUpdateOperationsInput | string
+  vatNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  zipCode?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -290,6 +404,12 @@ export type TaxProfileOrderByRelevanceInput = {
 
 export type TaxProfileCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  legalName?: Prisma.SortOrder
+  vatNumber?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  zipCode?: Prisma.SortOrder
+  country?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -297,6 +417,12 @@ export type TaxProfileCountOrderByAggregateInput = {
 
 export type TaxProfileMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  legalName?: Prisma.SortOrder
+  vatNumber?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  zipCode?: Prisma.SortOrder
+  country?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -304,6 +430,12 @@ export type TaxProfileMaxOrderByAggregateInput = {
 
 export type TaxProfileMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  legalName?: Prisma.SortOrder
+  vatNumber?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  city?: Prisma.SortOrder
+  zipCode?: Prisma.SortOrder
+  country?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
@@ -372,6 +504,12 @@ export type TaxProfileUpdateOneRequiredWithoutInvoicesNestedInput = {
 
 export type TaxProfileCreateWithoutUserInput = {
   id?: string
+  legalName: string
+  vatNumber: string
+  address: string
+  city: string
+  zipCode: string
+  country: string
   createdAt?: Date | string
   updatedAt?: Date | string
   invoices?: Prisma.InvoiceCreateNestedManyWithoutTaxProfileInput
@@ -379,6 +517,12 @@ export type TaxProfileCreateWithoutUserInput = {
 
 export type TaxProfileUncheckedCreateWithoutUserInput = {
   id?: string
+  legalName: string
+  vatNumber: string
+  address: string
+  city: string
+  zipCode: string
+  country: string
   createdAt?: Date | string
   updatedAt?: Date | string
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutTaxProfileInput
@@ -415,6 +559,12 @@ export type TaxProfileScalarWhereInput = {
   OR?: Prisma.TaxProfileScalarWhereInput[]
   NOT?: Prisma.TaxProfileScalarWhereInput | Prisma.TaxProfileScalarWhereInput[]
   id?: Prisma.StringFilter<"TaxProfile"> | string
+  legalName?: Prisma.StringFilter<"TaxProfile"> | string
+  vatNumber?: Prisma.StringFilter<"TaxProfile"> | string
+  address?: Prisma.StringFilter<"TaxProfile"> | string
+  city?: Prisma.StringFilter<"TaxProfile"> | string
+  zipCode?: Prisma.StringFilter<"TaxProfile"> | string
+  country?: Prisma.StringFilter<"TaxProfile"> | string
   createdAt?: Prisma.DateTimeFilter<"TaxProfile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"TaxProfile"> | Date | string
   userId?: Prisma.StringFilter<"TaxProfile"> | string
@@ -422,6 +572,12 @@ export type TaxProfileScalarWhereInput = {
 
 export type TaxProfileCreateWithoutInvoicesInput = {
   id?: string
+  legalName: string
+  vatNumber: string
+  address: string
+  city: string
+  zipCode: string
+  country: string
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutTaxProfilesInput
@@ -429,6 +585,12 @@ export type TaxProfileCreateWithoutInvoicesInput = {
 
 export type TaxProfileUncheckedCreateWithoutInvoicesInput = {
   id?: string
+  legalName: string
+  vatNumber: string
+  address: string
+  city: string
+  zipCode: string
+  country: string
   createdAt?: Date | string
   updatedAt?: Date | string
   userId: string
@@ -452,6 +614,12 @@ export type TaxProfileUpdateToOneWithWhereWithoutInvoicesInput = {
 
 export type TaxProfileUpdateWithoutInvoicesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  legalName?: Prisma.StringFieldUpdateOperationsInput | string
+  vatNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  zipCode?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutTaxProfilesNestedInput
@@ -459,6 +627,12 @@ export type TaxProfileUpdateWithoutInvoicesInput = {
 
 export type TaxProfileUncheckedUpdateWithoutInvoicesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  legalName?: Prisma.StringFieldUpdateOperationsInput | string
+  vatNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  zipCode?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -466,12 +640,24 @@ export type TaxProfileUncheckedUpdateWithoutInvoicesInput = {
 
 export type TaxProfileCreateManyUserInput = {
   id?: string
+  legalName: string
+  vatNumber: string
+  address: string
+  city: string
+  zipCode: string
+  country: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type TaxProfileUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  legalName?: Prisma.StringFieldUpdateOperationsInput | string
+  vatNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  zipCode?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invoices?: Prisma.InvoiceUpdateManyWithoutTaxProfileNestedInput
@@ -479,6 +665,12 @@ export type TaxProfileUpdateWithoutUserInput = {
 
 export type TaxProfileUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  legalName?: Prisma.StringFieldUpdateOperationsInput | string
+  vatNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  zipCode?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutTaxProfileNestedInput
@@ -486,6 +678,12 @@ export type TaxProfileUncheckedUpdateWithoutUserInput = {
 
 export type TaxProfileUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  legalName?: Prisma.StringFieldUpdateOperationsInput | string
+  vatNumber?: Prisma.StringFieldUpdateOperationsInput | string
+  address?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.StringFieldUpdateOperationsInput | string
+  zipCode?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -523,6 +721,12 @@ export type TaxProfileCountOutputTypeCountInvoicesArgs<ExtArgs extends runtime.T
 
 export type TaxProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  legalName?: boolean
+  vatNumber?: boolean
+  address?: boolean
+  city?: boolean
+  zipCode?: boolean
+  country?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
@@ -535,12 +739,18 @@ export type TaxProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
 
 export type TaxProfileSelectScalar = {
   id?: boolean
+  legalName?: boolean
+  vatNumber?: boolean
+  address?: boolean
+  city?: boolean
+  zipCode?: boolean
+  country?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   userId?: boolean
 }
 
-export type TaxProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["taxProfile"]>
+export type TaxProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "legalName" | "vatNumber" | "address" | "city" | "zipCode" | "country" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["taxProfile"]>
 export type TaxProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   invoices?: boolean | Prisma.TaxProfile$invoicesArgs<ExtArgs>
@@ -555,6 +765,12 @@ export type $TaxProfilePayload<ExtArgs extends runtime.Types.Extensions.Internal
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    legalName: string
+    vatNumber: string
+    address: string
+    city: string
+    zipCode: string
+    country: string
     createdAt: Date
     updatedAt: Date
     userId: string
@@ -930,6 +1146,12 @@ export interface Prisma__TaxProfileClient<T, Null = never, ExtArgs extends runti
  */
 export interface TaxProfileFieldRefs {
   readonly id: Prisma.FieldRef<"TaxProfile", 'String'>
+  readonly legalName: Prisma.FieldRef<"TaxProfile", 'String'>
+  readonly vatNumber: Prisma.FieldRef<"TaxProfile", 'String'>
+  readonly address: Prisma.FieldRef<"TaxProfile", 'String'>
+  readonly city: Prisma.FieldRef<"TaxProfile", 'String'>
+  readonly zipCode: Prisma.FieldRef<"TaxProfile", 'String'>
+  readonly country: Prisma.FieldRef<"TaxProfile", 'String'>
   readonly createdAt: Prisma.FieldRef<"TaxProfile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"TaxProfile", 'DateTime'>
   readonly userId: Prisma.FieldRef<"TaxProfile", 'String'>

@@ -88,6 +88,12 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 
 export const TaxProfileScalarFieldEnum = {
   id: 'id',
+  legalName: 'legalName',
+  vatNumber: 'vatNumber',
+  address: 'address',
+  city: 'city',
+  zipCode: 'zipCode',
+  country: 'country',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId'
@@ -98,6 +104,9 @@ export type TaxProfileScalarFieldEnum = (typeof TaxProfileScalarFieldEnum)[keyof
 
 export const InvoiceScalarFieldEnum = {
   id: 'id',
+  status: 'status',
+  amount: 'amount',
+  currency: 'currency',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   taxProfileId: 'taxProfileId'
@@ -135,6 +144,12 @@ export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnu
 
 export const TaxProfileOrderByRelevanceFieldEnum = {
   id: 'id',
+  legalName: 'legalName',
+  vatNumber: 'vatNumber',
+  address: 'address',
+  city: 'city',
+  zipCode: 'zipCode',
+  country: 'country',
   userId: 'userId'
 } as const
 

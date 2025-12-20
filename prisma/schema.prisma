@@ -29,6 +29,12 @@ model User {
 
 model TaxProfile {
   id        String    @id @default(uuid())
+  legalName String
+  vatNumber String
+  address   String
+  city      String
+  zipCode   String
+  country   String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   user      User      @relation(fields: [userId], references: [id])
@@ -37,9 +43,24 @@ model TaxProfile {
 }
 
 model Invoice {
-  id           String     @id @default(uuid())
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id           String        @id @default(uuid())
+  status       InvoiceStatus
+  amount       Float
+  currency     Currency
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   taxProfileId String
-  taxProfile   TaxProfile @relation(fields: [taxProfileId], references: [id])
+  taxProfile   TaxProfile    @relation(fields: [taxProfileId], references: [id])
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum Currency {
+  EUR
+  USD
+  GBP
 }

@@ -20,12 +20,25 @@ export type InvoiceModel = runtime.Types.Result.DefaultSelection<Prisma.$Invoice
 
 export type AggregateInvoice = {
   _count: InvoiceCountAggregateOutputType | null
+  _avg: InvoiceAvgAggregateOutputType | null
+  _sum: InvoiceSumAggregateOutputType | null
   _min: InvoiceMinAggregateOutputType | null
   _max: InvoiceMaxAggregateOutputType | null
 }
 
+export type InvoiceAvgAggregateOutputType = {
+  amount: number | null
+}
+
+export type InvoiceSumAggregateOutputType = {
+  amount: number | null
+}
+
 export type InvoiceMinAggregateOutputType = {
   id: string | null
+  status: $Enums.InvoiceStatus | null
+  amount: number | null
+  currency: $Enums.Currency | null
   createdAt: Date | null
   updatedAt: Date | null
   taxProfileId: string | null
@@ -33,6 +46,9 @@ export type InvoiceMinAggregateOutputType = {
 
 export type InvoiceMaxAggregateOutputType = {
   id: string | null
+  status: $Enums.InvoiceStatus | null
+  amount: number | null
+  currency: $Enums.Currency | null
   createdAt: Date | null
   updatedAt: Date | null
   taxProfileId: string | null
@@ -40,6 +56,9 @@ export type InvoiceMaxAggregateOutputType = {
 
 export type InvoiceCountAggregateOutputType = {
   id: number
+  status: number
+  amount: number
+  currency: number
   createdAt: number
   updatedAt: number
   taxProfileId: number
@@ -47,8 +66,19 @@ export type InvoiceCountAggregateOutputType = {
 }
 
 
+export type InvoiceAvgAggregateInputType = {
+  amount?: true
+}
+
+export type InvoiceSumAggregateInputType = {
+  amount?: true
+}
+
 export type InvoiceMinAggregateInputType = {
   id?: true
+  status?: true
+  amount?: true
+  currency?: true
   createdAt?: true
   updatedAt?: true
   taxProfileId?: true
@@ -56,6 +86,9 @@ export type InvoiceMinAggregateInputType = {
 
 export type InvoiceMaxAggregateInputType = {
   id?: true
+  status?: true
+  amount?: true
+  currency?: true
   createdAt?: true
   updatedAt?: true
   taxProfileId?: true
@@ -63,6 +96,9 @@ export type InvoiceMaxAggregateInputType = {
 
 export type InvoiceCountAggregateInputType = {
   id?: true
+  status?: true
+  amount?: true
+  currency?: true
   createdAt?: true
   updatedAt?: true
   taxProfileId?: true
@@ -107,6 +143,18 @@ export type InvoiceAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: InvoiceAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: InvoiceSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: InvoiceMinAggregateInputType
@@ -137,16 +185,23 @@ export type InvoiceGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: InvoiceCountAggregateInputType | true
+  _avg?: InvoiceAvgAggregateInputType
+  _sum?: InvoiceSumAggregateInputType
   _min?: InvoiceMinAggregateInputType
   _max?: InvoiceMaxAggregateInputType
 }
 
 export type InvoiceGroupByOutputType = {
   id: string
+  status: $Enums.InvoiceStatus
+  amount: number
+  currency: $Enums.Currency
   createdAt: Date
   updatedAt: Date
   taxProfileId: string
   _count: InvoiceCountAggregateOutputType | null
+  _avg: InvoiceAvgAggregateOutputType | null
+  _sum: InvoiceSumAggregateOutputType | null
   _min: InvoiceMinAggregateOutputType | null
   _max: InvoiceMaxAggregateOutputType | null
 }
@@ -171,6 +226,9 @@ export type InvoiceWhereInput = {
   OR?: Prisma.InvoiceWhereInput[]
   NOT?: Prisma.InvoiceWhereInput | Prisma.InvoiceWhereInput[]
   id?: Prisma.StringFilter<"Invoice"> | string
+  status?: Prisma.EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
+  amount?: Prisma.FloatFilter<"Invoice"> | number
+  currency?: Prisma.EnumCurrencyFilter<"Invoice"> | $Enums.Currency
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   taxProfileId?: Prisma.StringFilter<"Invoice"> | string
@@ -179,6 +237,9 @@ export type InvoiceWhereInput = {
 
 export type InvoiceOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  amount?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   taxProfileId?: Prisma.SortOrder
@@ -191,6 +252,9 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.InvoiceWhereInput | Prisma.InvoiceWhereInput[]
   OR?: Prisma.InvoiceWhereInput[]
   NOT?: Prisma.InvoiceWhereInput | Prisma.InvoiceWhereInput[]
+  status?: Prisma.EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
+  amount?: Prisma.FloatFilter<"Invoice"> | number
+  currency?: Prisma.EnumCurrencyFilter<"Invoice"> | $Enums.Currency
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   taxProfileId?: Prisma.StringFilter<"Invoice"> | string
@@ -199,12 +263,17 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
 
 export type InvoiceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  amount?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   taxProfileId?: Prisma.SortOrder
   _count?: Prisma.InvoiceCountOrderByAggregateInput
+  _avg?: Prisma.InvoiceAvgOrderByAggregateInput
   _max?: Prisma.InvoiceMaxOrderByAggregateInput
   _min?: Prisma.InvoiceMinOrderByAggregateInput
+  _sum?: Prisma.InvoiceSumOrderByAggregateInput
 }
 
 export type InvoiceScalarWhereWithAggregatesInput = {
@@ -212,6 +281,9 @@ export type InvoiceScalarWhereWithAggregatesInput = {
   OR?: Prisma.InvoiceScalarWhereWithAggregatesInput[]
   NOT?: Prisma.InvoiceScalarWhereWithAggregatesInput | Prisma.InvoiceScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Invoice"> | string
+  status?: Prisma.EnumInvoiceStatusWithAggregatesFilter<"Invoice"> | $Enums.InvoiceStatus
+  amount?: Prisma.FloatWithAggregatesFilter<"Invoice"> | number
+  currency?: Prisma.EnumCurrencyWithAggregatesFilter<"Invoice"> | $Enums.Currency
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Invoice"> | Date | string
   taxProfileId?: Prisma.StringWithAggregatesFilter<"Invoice"> | string
@@ -219,6 +291,9 @@ export type InvoiceScalarWhereWithAggregatesInput = {
 
 export type InvoiceCreateInput = {
   id?: string
+  status: $Enums.InvoiceStatus
+  amount: number
+  currency: $Enums.Currency
   createdAt?: Date | string
   updatedAt?: Date | string
   taxProfile: Prisma.TaxProfileCreateNestedOneWithoutInvoicesInput
@@ -226,6 +301,9 @@ export type InvoiceCreateInput = {
 
 export type InvoiceUncheckedCreateInput = {
   id?: string
+  status: $Enums.InvoiceStatus
+  amount: number
+  currency: $Enums.Currency
   createdAt?: Date | string
   updatedAt?: Date | string
   taxProfileId: string
@@ -233,6 +311,9 @@ export type InvoiceUncheckedCreateInput = {
 
 export type InvoiceUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   taxProfile?: Prisma.TaxProfileUpdateOneRequiredWithoutInvoicesNestedInput
@@ -240,6 +321,9 @@ export type InvoiceUpdateInput = {
 
 export type InvoiceUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   taxProfileId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -247,6 +331,9 @@ export type InvoiceUncheckedUpdateInput = {
 
 export type InvoiceCreateManyInput = {
   id?: string
+  status: $Enums.InvoiceStatus
+  amount: number
+  currency: $Enums.Currency
   createdAt?: Date | string
   updatedAt?: Date | string
   taxProfileId: string
@@ -254,12 +341,18 @@ export type InvoiceCreateManyInput = {
 
 export type InvoiceUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type InvoiceUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   taxProfileId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -283,13 +376,23 @@ export type InvoiceOrderByRelevanceInput = {
 
 export type InvoiceCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  amount?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   taxProfileId?: Prisma.SortOrder
 }
 
+export type InvoiceAvgOrderByAggregateInput = {
+  amount?: Prisma.SortOrder
+}
+
 export type InvoiceMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  amount?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   taxProfileId?: Prisma.SortOrder
@@ -297,9 +400,16 @@ export type InvoiceMaxOrderByAggregateInput = {
 
 export type InvoiceMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  amount?: Prisma.SortOrder
+  currency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   taxProfileId?: Prisma.SortOrder
+}
+
+export type InvoiceSumOrderByAggregateInput = {
+  amount?: Prisma.SortOrder
 }
 
 export type InvoiceCreateNestedManyWithoutTaxProfileInput = {
@@ -344,14 +454,36 @@ export type InvoiceUncheckedUpdateManyWithoutTaxProfileNestedInput = {
   deleteMany?: Prisma.InvoiceScalarWhereInput | Prisma.InvoiceScalarWhereInput[]
 }
 
+export type EnumInvoiceStatusFieldUpdateOperationsInput = {
+  set?: $Enums.InvoiceStatus
+}
+
+export type FloatFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type EnumCurrencyFieldUpdateOperationsInput = {
+  set?: $Enums.Currency
+}
+
 export type InvoiceCreateWithoutTaxProfileInput = {
   id?: string
+  status: $Enums.InvoiceStatus
+  amount: number
+  currency: $Enums.Currency
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type InvoiceUncheckedCreateWithoutTaxProfileInput = {
   id?: string
+  status: $Enums.InvoiceStatus
+  amount: number
+  currency: $Enums.Currency
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -387,6 +519,9 @@ export type InvoiceScalarWhereInput = {
   OR?: Prisma.InvoiceScalarWhereInput[]
   NOT?: Prisma.InvoiceScalarWhereInput | Prisma.InvoiceScalarWhereInput[]
   id?: Prisma.StringFilter<"Invoice"> | string
+  status?: Prisma.EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
+  amount?: Prisma.FloatFilter<"Invoice"> | number
+  currency?: Prisma.EnumCurrencyFilter<"Invoice"> | $Enums.Currency
   createdAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Invoice"> | Date | string
   taxProfileId?: Prisma.StringFilter<"Invoice"> | string
@@ -394,24 +529,36 @@ export type InvoiceScalarWhereInput = {
 
 export type InvoiceCreateManyTaxProfileInput = {
   id?: string
+  status: $Enums.InvoiceStatus
+  amount: number
+  currency: $Enums.Currency
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type InvoiceUpdateWithoutTaxProfileInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type InvoiceUncheckedUpdateWithoutTaxProfileInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type InvoiceUncheckedUpdateManyWithoutTaxProfileInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -420,6 +567,9 @@ export type InvoiceUncheckedUpdateManyWithoutTaxProfileInput = {
 
 export type InvoiceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  status?: boolean
+  amount?: boolean
+  currency?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   taxProfileId?: boolean
@@ -430,12 +580,15 @@ export type InvoiceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 
 export type InvoiceSelectScalar = {
   id?: boolean
+  status?: boolean
+  amount?: boolean
+  currency?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   taxProfileId?: boolean
 }
 
-export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "updatedAt" | "taxProfileId", ExtArgs["result"]["invoice"]>
+export type InvoiceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "status" | "amount" | "currency" | "createdAt" | "updatedAt" | "taxProfileId", ExtArgs["result"]["invoice"]>
 export type InvoiceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   taxProfile?: boolean | Prisma.TaxProfileDefaultArgs<ExtArgs>
 }
@@ -447,6 +600,9 @@ export type $InvoicePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    status: $Enums.InvoiceStatus
+    amount: number
+    currency: $Enums.Currency
     createdAt: Date
     updatedAt: Date
     taxProfileId: string
@@ -821,6 +977,9 @@ export interface Prisma__InvoiceClient<T, Null = never, ExtArgs extends runtime.
  */
 export interface InvoiceFieldRefs {
   readonly id: Prisma.FieldRef<"Invoice", 'String'>
+  readonly status: Prisma.FieldRef<"Invoice", 'InvoiceStatus'>
+  readonly amount: Prisma.FieldRef<"Invoice", 'Float'>
+  readonly currency: Prisma.FieldRef<"Invoice", 'Currency'>
   readonly createdAt: Prisma.FieldRef<"Invoice", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Invoice", 'DateTime'>
   readonly taxProfileId: Prisma.FieldRef<"Invoice", 'String'>

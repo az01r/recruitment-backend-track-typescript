@@ -659,6 +659,12 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 
 export const TaxProfileScalarFieldEnum = {
   id: 'id',
+  legalName: 'legalName',
+  vatNumber: 'vatNumber',
+  address: 'address',
+  city: 'city',
+  zipCode: 'zipCode',
+  country: 'country',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   userId: 'userId'
@@ -669,6 +675,9 @@ export type TaxProfileScalarFieldEnum = (typeof TaxProfileScalarFieldEnum)[keyof
 
 export const InvoiceScalarFieldEnum = {
   id: 'id',
+  status: 'status',
+  amount: 'amount',
+  currency: 'currency',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   taxProfileId: 'taxProfileId'
@@ -706,6 +715,12 @@ export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnu
 
 export const TaxProfileOrderByRelevanceFieldEnum = {
   id: 'id',
+  legalName: 'legalName',
+  vatNumber: 'vatNumber',
+  address: 'address',
+  city: 'city',
+  zipCode: 'zipCode',
+  country: 'country',
   userId: 'userId'
 } as const
 
@@ -737,6 +752,27 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'InvoiceStatus'
+ */
+export type EnumInvoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvoiceStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Currency'
+ */
+export type EnumCurrencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Currency'>
     
 
 
