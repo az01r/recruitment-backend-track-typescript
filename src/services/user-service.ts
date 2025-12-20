@@ -2,7 +2,7 @@ import prisma from "../utils/prisma.js";
 import { Prisma } from "../generated/prisma/client.js";
 
 class UserService {
-  async createUser(userData: Prisma.UserCreateInput) {
+  createUser = async (userData: Prisma.UserCreateInput) => {
     const existingUser = await prisma.user.findUnique({
       where: {
         email: userData.email
@@ -17,7 +17,7 @@ class UserService {
     return createdUser;
   }
 
-  async findUserByEmail(email: string) {
+  findUserByEmail = async (email: string) => {
     const user = await prisma.user.findUnique({
       where: {
         email: email
@@ -26,7 +26,7 @@ class UserService {
     return user;
   }
 
-  async findUserById(id: string) {
+  findUserById = async (id: string) => {
     const user = await prisma.user.findUnique({
       where: {
         id
@@ -35,7 +35,7 @@ class UserService {
     return user;
   }
 
-  async updateUser(id: string, userData: Prisma.UserUpdateInput) {
+  updateUser = async (id: string, userData: Prisma.UserUpdateInput) => {
     const user = await prisma.user.update({
       where: {
         id
@@ -45,7 +45,7 @@ class UserService {
     return user;
   }
 
-  async deleteUser(id: string) {
+  deleteUser = async (id: string) => {
     const user = await prisma.user.delete({
       where: {
         id

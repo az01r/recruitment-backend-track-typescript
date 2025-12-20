@@ -6,7 +6,7 @@ import { jwtSign } from "../utils/jwt-sign.js";
 
 class UserController {
 
-  async signup(req: Request, res: Response, next: NextFunction) {
+  signup = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password } = req.body;
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -18,7 +18,7 @@ class UserController {
     }
   }
 
-  async login(req: Request, res: Response, next: NextFunction) {
+  login = async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
     try {
       const user = await UserService.findUserByEmail(email);
@@ -38,7 +38,7 @@ class UserController {
     }
   }
 
-  async getUser(req: Request, res: Response, next: NextFunction) {
+  getUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await UserService.findUserById(req.userId!);
       if (!user) {
@@ -51,7 +51,7 @@ class UserController {
     }
   }
 
-  async updateUser(req: Request, res: Response, next: NextFunction) {
+  updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password, firstName, lastName, birthDate } = req.body;
       const user = await UserService.updateUser(req.userId!, {
@@ -67,7 +67,7 @@ class UserController {
     }
   }
 
-  async deleteUser(req: Request, res: Response, next: NextFunction) {
+  deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await UserService.deleteUser(req.userId!);
       if (!user) {
