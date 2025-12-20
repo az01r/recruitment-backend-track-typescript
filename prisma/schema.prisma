@@ -16,13 +16,15 @@ datasource db {
 model User {
   id          String       @id @default(uuid())
   email       String       @unique
-  firstName   String
-  lastName    String
   password    String
-  birthDate   DateTime
+  firstName   String?
+  lastName    String?
+  birthDate   DateTime?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   taxProfiles TaxProfile[]
+
+  @@index([email])
 }
 
 model TaxProfile {

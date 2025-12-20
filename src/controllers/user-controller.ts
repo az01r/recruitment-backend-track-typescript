@@ -1,0 +1,82 @@
+import type { Request, Response, NextFunction } from "express";
+import bcrypt from "bcryptjs";
+import "dotenv/config";
+import UserService from "../services/user-service.js";
+import { jwtSign } from "../utils/jwt-sign.js";
+
+class UserController {
+
+  async signup(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, password } = req.body;
+      const hashedPassword = await bcrypt.hash(password, 12);
+      const user = await UserService.createUser({ email, password: hashedPassword });
+      const token = jwtSign(user.id);
+      res.status(201).json({ message: "Signed up.", jwt: token });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async login(req: Request, res: Response, next: NextFunction) {
+    const { email, password } = req.body;
+    try {
+      const user = await UserService.findByEmail(email);
+      if (!user) {
+        res.status(404);
+        throw new Error("E-Mail not registered yet.");
+      }
+      const isEqual = await bcrypt.compare(password, user.password!);
+      if (!isEqual) {
+        res.status(401);
+        throw new Error("Password is incorrect.");
+      }
+      const token = jwtSign(user.id);
+      res.status(200).json({ message: "Logged in.", jwt: token });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await UserService.findById(req.userId!);
+      if (!user) {
+        res.status(404);
+        throw new Error("User not found.");
+      }
+      res.status(200).json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { email, password, firstName, lastName, birthDate } = req.body;
+      const user = await UserService.updateUser(req.userId!, { email, password, firstName, lastName, birthDate });
+      if (!user) {
+        res.status(404);
+        throw new Error("User not found.");
+      }
+      res.status(200).json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await UserService.deleteUser(req.userId!);
+      if (!user) {
+        res.status(404);
+        throw new Error("User not found.");
+      }
+      res.status(200).json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+export default new UserController();

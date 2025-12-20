@@ -21,6 +21,8 @@ services:
       # target: development
       target: production
     restart: always
+    depends_on:
+      - recruitment-db
     ports:
       - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
     # volumes:

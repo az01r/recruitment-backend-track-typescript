@@ -19,6 +19,10 @@ services:
       context: .
       target: development
     restart: always
+    env_file:
+      - .env
+    depends_on:
+      - recruitment-db
     ports:
       - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
     volumes:

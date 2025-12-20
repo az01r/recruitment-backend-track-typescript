@@ -8,5 +8,5 @@ declare global {
     }
   }
 
-  var prisma: PrismaClient | undefined;
+  var globalPrisma: PrismaClient | undefined;
 }
