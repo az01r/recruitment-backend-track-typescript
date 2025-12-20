@@ -6,6 +6,7 @@ import notFoundRouter from "./middlewares/not-found-route.js";
 import errorRouter from "./middlewares/error-route.js";
 import userRouter from "./routers/user-router.js";
 import taxProfileRouter from "./routers/tax-profile-router.js";
+import invoiceRouter from "./routers/invoice-router.js";
 import { checkDbConnection } from "./utils/check-db-connection.js";
 
 const app = express();
@@ -20,7 +21,7 @@ app.use(corsManager);
 
 app.use("/user", userRouter);
 app.use("/tax-profile", taxProfileRouter);
-// app.use("/invoice", invoiceRouter);
+app.use("/invoice", invoiceRouter);
 
 app.use(notFoundRouter);
 
