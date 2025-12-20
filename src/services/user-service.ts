@@ -1,5 +1,6 @@
 import prisma from "../utils/prisma.js";
 import { Prisma } from "../generated/prisma/client.js";
+import ReqValidationError from "../types/req-validation-error.js";
 
 class UserService {
   createUser = async (userData: Prisma.UserCreateInput) => {
@@ -9,7 +10,7 @@ class UserService {
       }
     });
     if (existingUser) {
-      throw new Error('User already registered.');
+      throw new ReqValidationError({ message: 'User already registered.', statusCode: 409 });
     }
     const createdUser = await prisma.user.create({
       data: userData

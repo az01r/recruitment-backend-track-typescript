@@ -7,9 +7,9 @@ import { jwtSign } from "../utils/jwt-sign.js";
 class UserController {
 
   signup = async (req: Request, res: Response, next: NextFunction) => {
+    const { email, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 12);
     try {
-      const { email, password } = req.body;
-      const hashedPassword = await bcrypt.hash(password, 12);
       const user = await UserService.createUser({ email, password: hashedPassword });
       const token = jwtSign(user.id);
       res.status(201).json({ message: "Signed up.", jwt: token });

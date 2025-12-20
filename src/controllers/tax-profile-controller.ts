@@ -53,6 +53,10 @@ class TaxProfileController {
         zipCode,
         country
       });
+      if (!taxProfile) {
+        res.status(404);
+        throw new Error('Tax profile not found.');
+      }
       res.status(200).json({ taxProfile });
     } catch (error) {
       next(error);
@@ -61,7 +65,11 @@ class TaxProfileController {
 
   deleteTaxProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await TaxProfileService.deleteTaxProfile(req.userId!, req.params.id);
+      const taxProfile = await TaxProfileService.deleteTaxProfile(req.userId!, req.params.id);
+      if (!taxProfile) {
+        res.status(404);
+        throw new Error('Tax profile not found.');
+      }
       res.status(200).json({ message: 'Tax profile deleted.' });
     } catch (error) {
       next(error);

@@ -1,5 +1,6 @@
 import prisma from "../utils/prisma.js";
 import { Prisma } from "../generated/prisma/client.js";
+import ReqValidationError from "../types/req-validation-error.js";
 
 class InvoiceService {
   findInvoicesByUserId = async (userId: string) => {
@@ -75,7 +76,7 @@ class InvoiceService {
     });
 
     if (!invoice) {
-      throw new Error("Invoice not found or does not belong to user.");
+      throw new ReqValidationError({ message: "Invoice not found or does not belong to user.", statusCode: 404 });
     }
   }
 
@@ -88,7 +89,7 @@ class InvoiceService {
     });
 
     if (!taxProfile) {
-      throw new Error("Tax Profile not found or does not belong to user.");
+      throw new ReqValidationError({ message: "Tax Profile not found or does not belong to user.", statusCode: 404 });
     }
   }
 }

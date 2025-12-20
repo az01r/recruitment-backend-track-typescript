@@ -6,10 +6,230 @@ import { saveValidation } from '../utils/validators/tax-profile-validators.js';
 
 const router = Router();
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     TaxProfile:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: The auto-generated id of the tax profile
+ *         userId:
+ *           type: string
+ *           description: The user id association
+ *         legalName:
+ *           type: string
+ *           description: The legal name of the entity
+ *         vatNumber:
+ *           type: string
+ *           description: The VAT number
+ *         address:
+ *           type: string
+ *           description: The address
+ *         city:
+ *           type: string
+ *           description: The city
+ *         zipCode:
+ *           type: string
+ *           description: The zip code
+ *         country:
+ *           type: string
+ *           description: The country
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: The tax profile creation date
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: The tax profile last update date
+ *       example:
+ *         id: d5fE_asz
+ *         userId: 12345
+ *         legalName: Acme Corp
+ *         vatNumber: IT12345678901
+ *         address: Via Roma 1
+ *         city: Rome
+ *         zipCode: 00100
+ *         country: Italy
+ */
+
+/**
+ * @swagger
+ * /tax-profile:
+ *   get:
+ *     summary: Returns the list of all tax profiles for the user
+ *     tags: [TaxProfile]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The list of tax profiles
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 taxProfiles:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/TaxProfile'
+ */
 router.get('/', isAuth, TaxProfileController.getTaxProfiles);
+
+/**
+ * @swagger
+ * /tax-profile/{id}:
+ *   get:
+ *     summary: Get a tax profile by id
+ *     tags: [TaxProfile]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The tax profile id
+ *     responses:
+ *       200:
+ *         description: The tax profile description by id
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 taxProfile:
+ *                   $ref: '#/components/schemas/TaxProfile'
+ *       404:
+ *         description: The tax profile was not found
+ */
 router.get('/:id', isAuth, TaxProfileController.getTaxProfile);
+
+/**
+ * @swagger
+ * /tax-profile:
+ *   post:
+ *     summary: Create a new tax profile
+ *     tags: [TaxProfile]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - legalName
+ *               - vatNumber
+ *               - address
+ *               - city
+ *               - zipCode
+ *               - country
+ *             properties:
+ *               legalName:
+ *                 type: string
+ *               vatNumber:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               city:
+ *                 type: string
+ *               zipCode:
+ *                 type: string
+ *               country:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: The tax profile was successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 taxProfile:
+ *                   $ref: '#/components/schemas/TaxProfile'
+ *       422:
+ *         description: Validation error
+ */
 router.post('/', isAuth, saveValidation, validateRequest, TaxProfileController.createTaxProfile);
+
+/**
+ * @swagger
+ * /tax-profile/{id}:
+ *   put:
+ *     summary: Update a tax profile
+ *     tags: [TaxProfile]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The tax profile id
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               legalName:
+ *                 type: string
+ *               vatNumber:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               city:
+ *                 type: string
+ *               zipCode:
+ *                 type: string
+ *               country:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: The tax profile was updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 taxProfile:
+ *                   $ref: '#/components/schemas/TaxProfile'
+ *       404:
+ *         description: The tax profile was not found
+ *       422:
+ *         description: Validation error
+ */
 router.put('/:id', isAuth, saveValidation, validateRequest, TaxProfileController.updateTaxProfile);
+
+/**
+ * @swagger
+ * /tax-profile/{id}:
+ *   delete:
+ *     summary: Remove the tax profile by id
+ *     tags: [TaxProfile]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The tax profile id
+ *     responses:
+ *       200:
+ *         description: The tax profile was deleted
+ *       404:
+ *         description: The tax profile was not found
+ */
 router.delete('/:id', isAuth, TaxProfileController.deleteTaxProfile);
 
 export default router;
