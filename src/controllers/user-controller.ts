@@ -55,10 +55,6 @@ class UserController {
     try {
       const { email, password, firstName, lastName, birthDate } = req.body;
       const user = await UserService.updateUser(req.userId!, { email, password, firstName, lastName, birthDate });
-      if (!user) {
-        res.status(404);
-        throw new Error("User not found.");
-      }
       res.status(200).json(user);
     } catch (error) {
       next(error);
