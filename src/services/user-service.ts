@@ -1,26 +1,23 @@
-import { CreateUserDto, UpdateUserDto } from "../types/dtos/user-dto.js";
 import prisma from "../utils/prisma.js";
+import { Prisma } from "../generated/prisma/client.js";
 
 class UserService {
-  async createUser(userData: CreateUserDto) {
+  async createUser(userData: Prisma.UserCreateInput) {
     const existingUser = await prisma.user.findUnique({
       where: {
         email: userData.email
       }
     });
     if (existingUser) {
-      throw new Error('An user with this email already exists.');
+      throw new Error('User already registered.');
     }
     const createdUser = await prisma.user.create({
-      data: {
-        email: userData.email,
-        password: userData.password,
-      }
+      data: userData
     });
     return createdUser;
   }
 
-  async findByEmail(email: string) {
+  async findUserByEmail(email: string) {
     const user = await prisma.user.findUnique({
       where: {
         email: email
@@ -29,7 +26,7 @@ class UserService {
     return user;
   }
 
-  async findById(id: string) {
+  async findUserById(id: string) {
     const user = await prisma.user.findUnique({
       where: {
         id
@@ -38,18 +35,12 @@ class UserService {
     return user;
   }
 
-  async updateUser(id: string, userData: UpdateUserDto) {
+  async updateUser(id: string, userData: Prisma.UserUpdateInput) {
     const user = await prisma.user.update({
       where: {
         id
       },
-      data: {
-        email: userData.email,
-        password: userData.password,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        birthDate: userData.birthDate,
-      }
+      data: userData
     });
     return user;
   }

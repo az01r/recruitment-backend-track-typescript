@@ -21,7 +21,7 @@ class UserController {
   async login(req: Request, res: Response, next: NextFunction) {
     const { email, password } = req.body;
     try {
-      const user = await UserService.findByEmail(email);
+      const user = await UserService.findUserByEmail(email);
       if (!user) {
         res.status(404);
         throw new Error("E-Mail not registered yet.");
@@ -40,7 +40,7 @@ class UserController {
 
   async getUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await UserService.findById(req.userId!);
+      const user = await UserService.findUserById(req.userId!);
       if (!user) {
         res.status(404);
         throw new Error("User not found.");
@@ -54,7 +54,13 @@ class UserController {
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password, firstName, lastName, birthDate } = req.body;
-      const user = await UserService.updateUser(req.userId!, { email, password, firstName, lastName, birthDate });
+      const user = await UserService.updateUser(req.userId!, {
+        email,
+        password,
+        firstName,
+        lastName,
+        birthDate: birthDate ? new Date(birthDate) : undefined
+      });
       res.status(200).json(user);
     } catch (error) {
       next(error);
