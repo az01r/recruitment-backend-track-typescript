@@ -1,4 +1,4 @@
-import { describe, it, mock, beforeEach, afterEach, after } from 'node:test';
+import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import UserController from './user-controller.js';
 import UserService from '../services/user-service.js';
@@ -45,10 +45,9 @@ describe('UserController', () => {
   describe('signup', () => {
     it('should signup a new user', async () => {
       req.body = { email: 'test@test.com', password: 'testtest' };
-
       const mockUser = { id: '1', email: 'test@test.com' };
-      (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve(null));
       (UserService.createUser as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
+      (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await UserController.signup(req, res, next);
 
@@ -60,8 +59,8 @@ describe('UserController', () => {
     it('should fallback to 409 if user already exists', async () => {
       req.body = { email: 'existinguser@test.com', password: 'testtest' };
       const error = new Error('User already registered.');
-      (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve({ id: '1', email: 'existinguser@test.com' }));
       (UserService.createUser as any).mock.mockImplementationOnce(() => Promise.reject(error));
+      (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve({ id: '1', email: 'existinguser@test.com' }));
 
       await UserController.signup(req, res, next);
 
