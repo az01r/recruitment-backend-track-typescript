@@ -10,6 +10,11 @@ class UserController {
     const { email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 12);
     try {
+      const existingUser = await UserService.findUserByEmail(email);
+      if (existingUser) {
+        res.status(409);
+        throw new Error("User already registered.");
+      }
       const user = await UserService.createUser({ email, password: hashedPassword });
       const token = jwtSign(user.id);
       res.status(201).json({ message: "Signed up.", jwt: token });
@@ -61,6 +66,10 @@ class UserController {
         lastName,
         birthDate: birthDate ? new Date(birthDate) : undefined
       });
+      if (!user) {
+        res.status(404);
+        throw new Error("User not found.");
+      }
       res.status(200).json(user);
     } catch (error) {
       next(error);

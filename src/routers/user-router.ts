@@ -178,6 +178,8 @@ router.get('/', isAuth, UserController.getUser);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: User not found
  *       422:
  *         description: Validation error
  */
