@@ -1,9 +1,17 @@
-import { describe, it, mock, beforeEach, afterEach } from 'node:test';
+import { describe, it, mock, beforeEach, afterEach, after } from 'node:test';
 import assert from 'node:assert';
 import UserController from './user-controller.js';
 import UserService from '../services/user-service.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+
+mock.method(UserService, 'findUserByEmail');
+mock.method(UserService, 'findUserById');
+mock.method(UserService, 'createUser');
+mock.method(UserService, 'updateUser');
+mock.method(UserService, 'deleteUser');
+mock.method(bcrypt, 'compare');
+mock.method(jwt, 'sign', () => 'mock_token');
 
 describe('UserController', () => {
   let req: any;
@@ -30,16 +38,14 @@ describe('UserController', () => {
     next = mock.fn();
   });
 
-  afterEach(() => {
+  after(() => {
     mock.reset();
   });
 
   describe('signup', () => {
     it('should signup a new user', async () => {
       req.body = { email: 'test@test.com', password: 'testtest' };
-      mock.method(UserService, 'findUserByEmail');
-      mock.method(UserService, 'createUser');
-      mock.method(jwt, 'sign', () => 'mock_token');
+
       const mockUser = { id: '1', email: 'test@test.com' };
       (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve(null));
       (UserService.createUser as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
@@ -54,8 +60,6 @@ describe('UserController', () => {
     it('should fallback to 409 if user already exists', async () => {
       req.body = { email: 'existinguser@test.com', password: 'testtest' };
       const error = new Error('User already registered.');
-      mock.method(UserService, 'findUserByEmail');
-      mock.method(UserService, 'createUser');
       (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve({ id: '1', email: 'existinguser@test.com' }));
       (UserService.createUser as any).mock.mockImplementationOnce(() => Promise.reject(error));
 
@@ -71,9 +75,6 @@ describe('UserController', () => {
     it('should login user with correct credentials', async () => {
       req.body = { email: 'test@test.com', password: 'testtest' };
       const mockUser = { id: '1', email: 'test@test.com' };
-      mock.method(UserService, 'findUserByEmail');
-      mock.method(bcrypt, 'compare');
-      mock.method(jwt, 'sign', () => 'mock_token');
       (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
       (bcrypt.compare as any).mock.mockImplementationOnce(() => Promise.resolve(true));
 
@@ -85,7 +86,6 @@ describe('UserController', () => {
 
     it('should fail if user not found', async () => {
       req.body = { email: 'email@notfound.com', password: 'testtest' };
-      mock.method(UserService, 'findUserByEmail');
       (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await UserController.login(req, res, next);
@@ -98,8 +98,6 @@ describe('UserController', () => {
     it('should fail if password incorrect', async () => {
       req.body = { email: 'test@test.com', password: 'wrongpassword' };
       const mockUser = { id: '1', email: 'test@test.com', password: 'hashed_password' };
-      mock.method(UserService, 'findUserByEmail');
-      mock.method(bcrypt, 'compare');
       (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
       (bcrypt.compare as any).mock.mockImplementationOnce(() => Promise.resolve(false));
 
@@ -114,7 +112,6 @@ describe('UserController', () => {
   describe('getUser', () => {
     it('should get user profile', async () => {
       const mockUser = { id: 'user123', email: 'test@test.com' };
-      mock.method(UserService, 'findUserById');
       (UserService.findUserById as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
 
       await UserController.getUser(req, res, next);
@@ -124,7 +121,6 @@ describe('UserController', () => {
     });
 
     it('should fallback to 404 if user not found', async () => {
-      mock.method(UserService, 'findUserById');
       (UserService.findUserById as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await UserController.getUser(req, res, next);
@@ -139,7 +135,6 @@ describe('UserController', () => {
     it('should update user', async () => {
       req.body = { firstName: 'Updated' };
       const mockUser = { id: 'user123', firstName: 'Updated' };
-      mock.method(UserService, 'updateUser');
       (UserService.updateUser as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
 
       await UserController.updateUser(req, res, next);
@@ -150,7 +145,6 @@ describe('UserController', () => {
 
     it('should fallback to 404 if user not found', async () => {
       req.body = { firstName: 'Updated' };
-      mock.method(UserService, 'updateUser');
       (UserService.updateUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await UserController.updateUser(req, res, next);
@@ -164,7 +158,6 @@ describe('UserController', () => {
   describe('deleteUser', () => {
     it('should delete user', async () => {
       const mockUser = { id: 'user123' };
-      mock.method(UserService, 'deleteUser');
       (UserService.deleteUser as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
 
       await UserController.deleteUser(req, res, next);
@@ -174,7 +167,6 @@ describe('UserController', () => {
     });
 
     it('should fallback to 404 if user not found', async () => {
-      mock.method(UserService, 'deleteUser');
       (UserService.deleteUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await UserController.deleteUser(req, res, next);
