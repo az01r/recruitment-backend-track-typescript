@@ -1,16 +1,22 @@
-import prisma from "../utils/prisma.js";
-import { Prisma } from "../generated/prisma/client.js";
+import prismaClientSingleton from "../utils/prisma.js";
+import { Prisma, PrismaClient } from "../generated/prisma/client.js";
 
 class UserService {
+  private prismaClient: PrismaClient;
+
+  constructor(prismaClient: PrismaClient = prismaClientSingleton) {
+    this.prismaClient = prismaClient;
+  }
+
   createUser = async (userData: Prisma.UserCreateInput) => {
-    const createdUser = await prisma.user.create({
+    const createdUser = await this.prismaClient.user.create({
       data: userData
     });
     return createdUser;
   }
 
   findUserByEmail = async (email: string) => {
-    const user = await prisma.user.findUnique({
+    const user = await this.prismaClient.user.findUnique({
       where: {
         email: email
       }
@@ -19,7 +25,7 @@ class UserService {
   }
 
   findUserById = async (id: string) => {
-    const user = await prisma.user.findUnique({
+    const user = await this.prismaClient.user.findUnique({
       where: {
         id
       }
@@ -28,7 +34,7 @@ class UserService {
   }
 
   updateUser = async (id: string, userData: Prisma.UserUpdateInput) => {
-    const user = await prisma.user.update({
+    const user = await this.prismaClient.user.update({
       where: {
         id
       },
@@ -38,7 +44,7 @@ class UserService {
   }
 
   deleteUser = async (id: string) => {
-    const user = await prisma.user.delete({
+    const user = await this.prismaClient.user.delete({
       where: {
         id
       }
@@ -48,3 +54,4 @@ class UserService {
 }
 
 export default new UserService();
+export { UserService };

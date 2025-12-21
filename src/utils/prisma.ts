@@ -10,9 +10,9 @@ const adapter = new PrismaMariaDb({
   connectionLimit: 5
 });
 
-const prisma = global.globalPrisma || new PrismaClient({ adapter });
+const prismaClientSingleton = global.globalPrisma || new PrismaClient({ adapter });
 if (process.env.NODE_ENV === 'dev') {
-  global.globalPrisma = prisma;
+  global.globalPrisma = prismaClientSingleton;
 }
 
-export default prisma;
+export default prismaClientSingleton;
