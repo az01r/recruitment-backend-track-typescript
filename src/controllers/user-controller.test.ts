@@ -5,19 +5,6 @@ import UserService from '../services/user-service.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-// Mock dependencies
-// mock.method(UserService, 'createUser');
-// mock.method(UserService, 'findUserByEmail');
-// mock.method(UserService, 'findUserById');
-// mock.method(UserService, 'updateUser');
-// mock.method(UserService, 'deleteUser');
-
-// Mock bcrypt
-// mock.method(bcrypt, 'hash', async () => 'hashed_password');
-// mock.method(bcrypt, 'compare');
-
-
-
 describe('UserController', () => {
   let req: any;
   let res: any;
