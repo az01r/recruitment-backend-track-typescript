@@ -4,8 +4,10 @@ import TaxProfileService from "../services/tax-profile-service.js";
 class TaxProfileController {
 
   getTaxProfiles = async (req: Request, res: Response, next: NextFunction) => {
+    const skip = Number(req.query.skip) || 0;
+    const take = Number(req.query.take) || 50;
     try {
-      const taxProfiles = await TaxProfileService.findTaxProfilesByUserId(req.userId!);
+      const taxProfiles = await TaxProfileService.findTaxProfilesByUserId(req.userId!, skip, take);
       res.status(200).json({ taxProfiles });
     } catch (error) {
       next(error);

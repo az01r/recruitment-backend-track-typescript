@@ -3,31 +3,41 @@ import { Prisma } from "../generated/prisma/client.js";
 import ReqValidationError from "../types/req-validation-error.js";
 
 class InvoiceService {
-  findInvoicesByUserId = async (userId: string) => {
+  findInvoicesByUserId = async (userId: string, skip: number, take: number) => {
     const invoices = await prisma.invoice.findMany({
+      skip,
+      take,
       where: {
         taxProfile: {
           userId
         }
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     });
     return invoices;
   }
 
-  findInvoicesByUserIdAndTaxProfileId = async (userId: string, taxProfileId: string) => {
+  findInvoicesByUserIdAndTaxProfileId = async (userId: string, taxProfileId: string, skip: number, take: number) => {
     const invoices = await prisma.invoice.findMany({
+      skip,
+      take,
       where: {
         taxProfileId,
         taxProfile: {
           userId
         }
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     });
     return invoices;
   }
 
   findInvoiceByUserIdAndId = async (userId: string, invoiceId: string) => {
-    const invoice = await prisma.invoice.findFirst({
+    const invoice = await prisma.invoice.findUnique({
       where: {
         id: invoiceId,
         taxProfile: {

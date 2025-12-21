@@ -2,10 +2,15 @@ import prisma from "../utils/prisma.js";
 import { Prisma } from "../generated/prisma/client.js";
 
 class TaxProfileService {
-  findTaxProfilesByUserId = async (userId: string) => {
+  findTaxProfilesByUserId = async (userId: string, skip: number, take: number) => {
     const taxProfiles = await prisma.taxProfile.findMany({
+      skip,
+      take,
       where: {
         userId
+      },
+      orderBy: {
+        createdAt: "desc"
       }
     });
     return taxProfiles;

@@ -6,11 +6,13 @@ class InvoiceController {
   getUserInvoices = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const taxProfileId = req.query.taxProfileId as string;
+      const skip = Number(req.query.skip) || 0;
+      const take = Number(req.query.take) || 50;
       let invoices;
       if (taxProfileId) {
-        invoices = await InvoiceService.findInvoicesByUserIdAndTaxProfileId(req.userId!, taxProfileId);
+        invoices = await InvoiceService.findInvoicesByUserIdAndTaxProfileId(req.userId!, taxProfileId, skip, take);
       } else {
-        invoices = await InvoiceService.findInvoicesByUserId(req.userId!);
+        invoices = await InvoiceService.findInvoicesByUserId(req.userId!, skip, take);
       }
       res.status(200).json({ invoices });
     } catch (error) {
