@@ -1,10 +1,22 @@
-import prisma from "../utils/prisma.js";
-import { Prisma } from "../generated/prisma/client.js";
+import prismaClientSingleton from "../utils/prisma.js";
+import { Prisma, PrismaClient } from "../generated/prisma/client.js";
 import ReqValidationError from "../types/req-validation-error.js";
 
 class InvoiceService {
+  private prismaClient: PrismaClient;
+
+  constructor(prismaClient: PrismaClient = prismaClientSingleton) {
+    this.prismaClient = prismaClient;
+  }
+
+  createInvoice = async (userId: string, data: Prisma.InvoiceCreateWithoutTaxProfileInput & { taxProfileId: string }) => {
+    await this.validateTaxProfileOwnership(userId, data.taxProfileId);
+
+    return await this.prismaClient.invoice.create({ data });
+  }
+
   findInvoicesByUserId = async (userId: string, skip: number, take: number) => {
-    const invoices = await prisma.invoice.findMany({
+    return await this.prismaClient.invoice.findMany({
       skip,
       take,
       where: {
@@ -16,11 +28,10 @@ class InvoiceService {
         createdAt: 'desc'
       }
     });
-    return invoices;
   }
 
   findInvoicesByUserIdAndTaxProfileId = async (userId: string, taxProfileId: string, skip: number, take: number) => {
-    const invoices = await prisma.invoice.findMany({
+    return await this.prismaClient.invoice.findMany({
       skip,
       take,
       where: {
@@ -33,11 +44,10 @@ class InvoiceService {
         createdAt: 'desc'
       }
     });
-    return invoices;
   }
 
   findInvoiceByUserIdAndId = async (userId: string, invoiceId: string) => {
-    const invoice = await prisma.invoice.findUnique({
+    return await this.prismaClient.invoice.findUnique({
       where: {
         id: invoiceId,
         taxProfile: {
@@ -45,20 +55,11 @@ class InvoiceService {
         }
       }
     });
-    return invoice;
-  }
-
-  createInvoice = async (userId: string, data: Prisma.InvoiceCreateWithoutTaxProfileInput & { taxProfileId: string }) => {
-    this.validateTaxProfileOwnership(userId, data.taxProfileId);
-
-    return await prisma.invoice.create({
-      data
-    });
   }
 
   updateInvoice = async (userId: string, invoiceId: string, data: Prisma.InvoiceUpdateWithoutTaxProfileInput) => {
-    this.validateInvoiceOwnership(userId, invoiceId);
-    return await prisma.invoice.update({
+    await this.validateInvoiceOwnership(userId, invoiceId);
+    return await this.prismaClient.invoice.update({
       where: {
         id: invoiceId
       },
@@ -67,8 +68,8 @@ class InvoiceService {
   }
 
   deleteInvoice = async (userId: string, invoiceId: string) => {
-    this.validateInvoiceOwnership(userId, invoiceId);
-    return await prisma.invoice.delete({
+    await this.validateInvoiceOwnership(userId, invoiceId);
+    return await this.prismaClient.invoice.delete({
       where: {
         id: invoiceId
       }
@@ -76,7 +77,7 @@ class InvoiceService {
   }
 
   private validateInvoiceOwnership = async (userId: string, invoiceId: string) => {
-    const invoice = await prisma.invoice.findFirst({
+    const invoice = await this.prismaClient.invoice.findUnique({
       where: {
         id: invoiceId,
         taxProfile: {
@@ -91,7 +92,7 @@ class InvoiceService {
   }
 
   private validateTaxProfileOwnership = async (userId: string, taxProfileId: string) => {
-    const taxProfile = await prisma.taxProfile.findFirst({
+    const taxProfile = await this.prismaClient.taxProfile.findUnique({
       where: {
         id: taxProfileId,
         userId
@@ -105,3 +106,4 @@ class InvoiceService {
 }
 
 export default new InvoiceService();
+export { InvoiceService };

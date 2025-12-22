@@ -1,9 +1,24 @@
-import prisma from "../utils/prisma.js";
-import { Prisma } from "../generated/prisma/client.js";
+import { Prisma, PrismaClient } from "../generated/prisma/client.js";
+import prismaClientSingleton from "../utils/prisma.js";
 
 class TaxProfileService {
+  private prismaClient: PrismaClient;
+
+  constructor(prismaClient: PrismaClient = prismaClientSingleton) {
+    this.prismaClient = prismaClient;
+  }
+
+  createTaxProfile = async (userId: string, data: Prisma.TaxProfileCreateWithoutUserInput) => {
+    return await this.prismaClient.taxProfile.create({
+      data: {
+        ...data,
+        userId
+      }
+    });
+  }
+
   findTaxProfilesByUserId = async (userId: string, skip: number, take: number) => {
-    const taxProfiles = await prisma.taxProfile.findMany({
+    const taxProfiles = await this.prismaClient.taxProfile.findMany({
       skip,
       take,
       where: {
@@ -17,7 +32,7 @@ class TaxProfileService {
   }
 
   findTaxProfileByIdAndUserId = async (userId: string, taxProfileId: string) => {
-    const taxProfile = await prisma.taxProfile.findUnique({
+    const taxProfile = await this.prismaClient.taxProfile.findUnique({
       where: {
         id: taxProfileId,
         userId
@@ -26,17 +41,8 @@ class TaxProfileService {
     return taxProfile;
   }
 
-  createTaxProfile = async (userId: string, data: Prisma.TaxProfileCreateWithoutUserInput) => {
-    return await prisma.taxProfile.create({
-      data: {
-        ...data,
-        userId
-      }
-    });
-  }
-
   updateTaxProfile = async (userId: string, taxProfileId: string, data: Prisma.TaxProfileUpdateWithoutUserInput) => {
-    return await prisma.taxProfile.update({
+    return await this.prismaClient.taxProfile.update({
       where: {
         id: taxProfileId,
         userId
@@ -46,7 +52,7 @@ class TaxProfileService {
   }
 
   deleteTaxProfile = async (userId: string, taxProfileId: string) => {
-    return await prisma.taxProfile.delete({
+    return await this.prismaClient.taxProfile.delete({
       where: {
         id: taxProfileId,
         userId
@@ -56,3 +62,4 @@ class TaxProfileService {
 }
 
 export default new TaxProfileService();
+export { TaxProfileService };
