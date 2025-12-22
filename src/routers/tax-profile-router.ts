@@ -2,7 +2,7 @@ import { Router } from 'express';
 import TaxProfileController from '../controllers/tax-profile-controller.js';
 import { isAuth } from '../middlewares/is-auth.js';
 import { validateRequest } from '../middlewares/req-validation.js';
-import { saveValidation } from '../utils/validators/tax-profile-validators.js';
+import { createValidation, updateValidation } from '../utils/validators/tax-profile-validators.js';
 
 const router = Router();
 
@@ -47,7 +47,7 @@ const router = Router();
  *           description: The tax profile last update date
  *       example:
  *         id: d5fE_asz
- *         userId: 12345
+ *         userId: userId1234
  *         legalName: Acme Corp
  *         vatNumber: IT12345678901
  *         address: Via Roma 1
@@ -64,6 +64,17 @@ const router = Router();
  *     tags: [TaxProfile]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - name: skip
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: integer
+ *       - name: take
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: The list of tax profiles
@@ -156,7 +167,7 @@ router.get('/:id', isAuth, TaxProfileController.getTaxProfile);
  *       422:
  *         description: Validation error
  */
-router.post('/', isAuth, saveValidation, validateRequest, TaxProfileController.createTaxProfile);
+router.post('/', isAuth, createValidation, validateRequest, TaxProfileController.createTaxProfile);
 
 /**
  * @swagger
@@ -207,7 +218,7 @@ router.post('/', isAuth, saveValidation, validateRequest, TaxProfileController.c
  *       422:
  *         description: Validation error
  */
-router.put('/:id', isAuth, saveValidation, validateRequest, TaxProfileController.updateTaxProfile);
+router.put('/:id', isAuth, updateValidation, validateRequest, TaxProfileController.updateTaxProfile);
 
 /**
  * @swagger

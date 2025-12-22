@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from "../generated/prisma/client.js";
+import ReqValidationError from "../types/req-validation-error.js";
 import prismaClientSingleton from "../utils/prisma.js";
 
 class TaxProfileService {
@@ -18,7 +19,7 @@ class TaxProfileService {
   }
 
   findTaxProfilesByUserId = async (userId: string, skip: number, take: number) => {
-    const taxProfiles = await this.prismaClient.taxProfile.findMany({
+    return await this.prismaClient.taxProfile.findMany({
       skip,
       take,
       where: {
@@ -28,36 +29,48 @@ class TaxProfileService {
         createdAt: "desc"
       }
     });
-    return taxProfiles;
   }
 
   findTaxProfileByIdAndUserId = async (userId: string, taxProfileId: string) => {
-    const taxProfile = await this.prismaClient.taxProfile.findUnique({
+    return await this.prismaClient.taxProfile.findUnique({
       where: {
         id: taxProfileId,
         userId
       }
     });
-    return taxProfile;
   }
 
   updateTaxProfile = async (userId: string, taxProfileId: string, data: Prisma.TaxProfileUpdateWithoutUserInput) => {
+    await this.validateTaxProfileOwnership(userId, taxProfileId);
+
     return await this.prismaClient.taxProfile.update({
       where: {
-        id: taxProfileId,
-        userId
+        id: taxProfileId
       },
       data
     });
   }
 
   deleteTaxProfile = async (userId: string, taxProfileId: string) => {
+    await this.validateTaxProfileOwnership(userId, taxProfileId);
     return await this.prismaClient.taxProfile.delete({
+      where: {
+        id: taxProfileId
+      }
+    });
+  }
+
+  private validateTaxProfileOwnership = async (userId: string, taxProfileId: string) => {
+    const taxProfile = await this.prismaClient.taxProfile.findUnique({
       where: {
         id: taxProfileId,
         userId
       }
     });
+
+    if (!taxProfile) {
+      throw new ReqValidationError({ message: "Tax Profile not found or does not belong to user.", statusCode: 404 });
+    }
   }
 }
 
