@@ -43,11 +43,21 @@ class InvoiceController {
       status,
       currency
     });
+    // implicit check in InvoiceService.updateInvoice
+    // if (!invoice) {
+    //   res.status(404);
+    //   throw new Error('Invoice not found.');
+    // }
     res.status(200).json({ invoice });
   }
 
   deleteInvoice = async (req: Request, res: Response, _next: NextFunction) => {
     await InvoiceService.deleteInvoice(req.userId!, req.params.id);
+    // implicit check in InvoiceService.deleteInvoice
+    // if (!invoice) {
+    //   res.status(404);
+    //   throw new Error('Invoice not found.');
+    // }
     res.status(200).json({ message: 'Invoice deleted.' });
   }
 }
