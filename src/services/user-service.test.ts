@@ -1,4 +1,4 @@
-import { describe, it, mock, beforeEach } from 'node:test';
+import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import { UserService } from "./user-service.js";
 import { Prisma } from '../generated/prisma/client.js';
@@ -19,9 +19,14 @@ describe('UserService', () => {
     userService = new UserService(prismaMock);
   });
 
+  after(() => {
+    mock.reset();
+  });
+
   describe('createUser', () => {
     it('should create a new user', async () => {
       const userData = { email: 'test@test.com', password: 'testtest' };
+
       const createdUser = { id: '1', ...userData, createdAt: new Date(), updatedAt: new Date() };
       prismaMock.user.create.mock.mockImplementationOnce(() => Promise.resolve(createdUser));
 
@@ -36,6 +41,7 @@ describe('UserService', () => {
     describe('findUserByEmail', () => {
       it('should find a user by email', async () => {
         const email = 'test@test.com';
+
         const user = { id: '1', email, password: 'testtest' };
         prismaMock.user.findUnique.mock.mockImplementationOnce(() => Promise.resolve(user));
 
@@ -58,6 +64,7 @@ describe('UserService', () => {
     describe('findUserById', () => {
       it('should find a user by id', async () => {
         const id = '1';
+
         const user = { id, email: 'test@test.com' };
         prismaMock.user.findUnique.mock.mockImplementationOnce(() => Promise.resolve(user));
 
@@ -70,8 +77,12 @@ describe('UserService', () => {
       });
 
       it('should return null if user was not found', async () => {
+        const id = 'notfound';
+
         prismaMock.user.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
-        const result = await userService.findUserById('notfound');
+
+        const result = await userService.findUserById(id);
+
         assert.strictEqual(result, null);
         assert.strictEqual(prismaMock.user.findUnique.mock.callCount(), 1);
       });
@@ -81,6 +92,7 @@ describe('UserService', () => {
       it('should update a user', async () => {
         const id = '1';
         const updateData: Prisma.UserUpdateInput = { firstName: 'Updated Name' };
+
         const updatedUser = { id, email: 'test@test.com', ...updateData };
         prismaMock.user.update.mock.mockImplementationOnce(() => Promise.resolve(updatedUser));
 
@@ -93,8 +105,12 @@ describe('UserService', () => {
       });
 
       it('should return null if user was not found', async () => {
+        const id = 'notfound';
+
         prismaMock.user.update.mock.mockImplementationOnce(() => Promise.resolve(null));
-        const result = await userService.updateUser('notfound', { firstName: 'Updated Name' });
+
+        const result = await userService.updateUser(id, { firstName: 'Updated Name' });
+
         assert.strictEqual(result, null);
         assert.strictEqual(prismaMock.user.update.mock.callCount(), 1);
       });
@@ -103,6 +119,7 @@ describe('UserService', () => {
     describe('deleteUser', () => {
       it('should delete a user', async () => {
         const id = '1';
+
         const deletedUser = { id, email: 'test@test.com' };
         prismaMock.user.delete.mock.mockImplementationOnce(() => Promise.resolve(deletedUser));
 
@@ -115,8 +132,12 @@ describe('UserService', () => {
       });
 
       it('should return null if user was not found', async () => {
+        const id = 'notfound';
+
         prismaMock.user.delete.mock.mockImplementationOnce(() => Promise.resolve(null));
-        const result = await userService.deleteUser('notfound');
+
+        const result = await userService.deleteUser(id);
+
         assert.strictEqual(result, null);
         assert.strictEqual(prismaMock.user.delete.mock.callCount(), 1);
       });
