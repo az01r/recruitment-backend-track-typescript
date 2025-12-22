@@ -191,7 +191,7 @@ describe('InvoiceService', () => {
       assert.strictEqual(prismaMock.invoice.update.mock.callCount(), 1);
     });
 
-    it('should throw error if invoice does not belong to user', async () => {
+    it('should throw error if invoice was not found ordoes not belong to user', async () => {
       const userId = 'user123';
       const invoiceId = 'invoice123';
       const updateData: Prisma.InvoiceUpdateWithoutTaxProfileInput = { amount: 1500 };
@@ -236,7 +236,7 @@ describe('InvoiceService', () => {
       assert.strictEqual(prismaMock.invoice.delete.mock.callCount(), 1);
     });
 
-    it('should throw error if invoice does not belong to user', async () => {
+    it('should throw error if invoice was not found or does not belong to user', async () => {
       const userId = 'user123';
       const invoiceId = 'invoice123';
 
