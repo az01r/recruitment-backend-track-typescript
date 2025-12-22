@@ -38,7 +38,7 @@ const router = Router();
  *           description: The invoice currency. Possible values [ EUR, USD, GBP ]
  *       example:
  *         id: d5fE_asz
- *         taxProfileId: 12345
+ *         taxProfileId: asd151
  *         createdAt: 2023-10-01T12:00:00Z
  *         amount: 100.50
  *         status: PAID
@@ -49,7 +49,7 @@ const router = Router();
  * @swagger
  * /invoice:
  *   get:
- *     summary: Returns the list of invoices for the user
+ *     summary: Returns the list of invoices of the logged user or the invoices of a specific tax profile
  *     tags: [Invoice]
  *     security:
  *       - bearerAuth: []
@@ -129,10 +129,22 @@ router.get('/:id', isAuth, InvoiceController.getInvoice);
  *                 type: string
  *               amount:
  *                 type: number
+ *                 minimum: 0
+ *                 example: 100.50
  *               status:
  *                 type: string
+ *                 example: PAID
+ *                 enum:
+ *                   - PAID
+ *                   - PENDING
+ *                   - FAILED
  *               currency:
  *                 type: string
+ *                 example: EUR
+ *                 enum:
+ *                   - EUR
+ *                   - USD
+ *                   - GBP
  *     responses:
  *       201:
  *         description: The invoice was successfully created

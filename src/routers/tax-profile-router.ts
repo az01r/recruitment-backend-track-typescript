@@ -144,16 +144,22 @@ router.get('/:id', isAuth, TaxProfileController.getTaxProfile);
  *             properties:
  *               legalName:
  *                 type: string
+ *                 example: Multidialogo
  *               vatNumber:
  *                 type: string
+ *                 example: IT01234567890
  *               address:
  *                 type: string
+ *                 example: Via Roma 1
  *               city:
  *                 type: string
+ *                 example: Torino
  *               zipCode:
  *                 type: string
+ *                 example: 10123
  *               country:
  *                 type: string
+ *                 example: Italy
  *     responses:
  *       201:
  *         description: The tax profile was successfully created
@@ -193,16 +199,22 @@ router.post('/', isAuth, createValidation, validateRequest, TaxProfileController
  *             properties:
  *               legalName:
  *                 type: string
+ *                 example: Multidialogo
  *               vatNumber:
  *                 type: string
+ *                 example: IT01234567890
  *               address:
  *                 type: string
+ *                 example: Via Roma 1
  *               city:
  *                 type: string
+ *                 example: Torino
  *               zipCode:
  *                 type: string
+ *                 example: 10123
  *               country:
  *                 type: string
+ *                 example: Italy
  *     responses:
  *       200:
  *         description: The tax profile was updated

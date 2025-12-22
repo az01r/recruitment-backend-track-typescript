@@ -63,8 +63,10 @@ const router = Router();
  *             properties:
  *               email:
  *                 type: string
+ *                 example: test@test.com
  *               password:
  *                 type: string
+ *                 example: testtest
  *     responses:
  *       201:
  *         description: The user was successfully created
@@ -102,8 +104,10 @@ router.post('/signup', signupValidation, validateRequest, UserController.signup)
  *             properties:
  *               email:
  *                 type: string
+ *                 example: test@test.com
  *               password:
  *                 type: string
+ *                 example: testtest
  *     responses:
  *       200:
  *         description: The user was successfully logged in
@@ -162,15 +166,20 @@ router.get('/', isAuth, UserController.getUser);
  *             properties:
  *               email:
  *                 type: string
+ *                 example: test@test.com
  *               password:
  *                 type: string
+ *                 example: testtest
  *               firstName:
  *                 type: string
+ *                 example: John
  *               lastName:
  *                 type: string
+ *                 example: Doe
  *               birthDate:
  *                 type: string
  *                 format: date
+ *                 example: 1990-01-01
  *     responses:
  *       200:
  *         description: The updated user profile
