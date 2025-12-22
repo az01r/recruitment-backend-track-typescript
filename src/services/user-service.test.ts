@@ -98,10 +98,10 @@ describe('UserService', () => {
 
         const result = await userService.updateUser(id, updateData);
 
-        assert.deepStrictEqual(result, updatedUser);
-        assert.strictEqual(prismaMock.user.update.mock.callCount(), 1);
         const callArgs = prismaMock.user.update.mock.calls[0].arguments[0];
         assert.deepStrictEqual(callArgs, { where: { id }, data: updateData });
+        assert.deepStrictEqual(result, updatedUser);
+        assert.strictEqual(prismaMock.user.update.mock.callCount(), 1);
       });
 
       it('should return null if user was not found', async () => {
@@ -125,10 +125,10 @@ describe('UserService', () => {
 
         const result = await userService.deleteUser(id);
 
-        assert.deepStrictEqual(result, deletedUser);
-        assert.strictEqual(prismaMock.user.delete.mock.callCount(), 1);
         const callArgs = prismaMock.user.delete.mock.calls[0].arguments[0];
         assert.deepStrictEqual(callArgs, { where: { id } });
+        assert.deepStrictEqual(result, deletedUser);
+        assert.strictEqual(prismaMock.user.delete.mock.callCount(), 1);
       });
 
       it('should return null if user was not found', async () => {
