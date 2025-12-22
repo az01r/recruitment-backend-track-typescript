@@ -21,7 +21,7 @@ services:
   recruitment-backend:
     build:
       context: .
-      target: development
+      target: ${NODE_ENV:-development}
     restart: always
     env_file:
       - .env

@@ -11,7 +11,7 @@ const adapter = new PrismaMariaDb({
 });
 
 const prismaClientSingleton = global.globalPrisma || new PrismaClient({ adapter });
-if (process.env.NODE_ENV === 'dev') {
+if (process.env.NODE_ENV !== 'production') {
   global.globalPrisma = prismaClientSingleton;
 }
 
