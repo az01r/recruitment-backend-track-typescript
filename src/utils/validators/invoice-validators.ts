@@ -7,7 +7,8 @@ export const saveInvoiceValidation = [
     .withMessage('Tax Profile ID is required.'),
   body('amount')
     .isFloat({ min: 0 })
-    .withMessage('Amount must be a positive number.'),
+    .withMessage('Amount must be a positive number.')
+    .toFloat(),
   body('status')
     .isIn(['PENDING', 'PAID', 'CANCELLED'])
     .withMessage('Status must be one of PENDING, PAID, CANCELLED.'),
@@ -20,7 +21,8 @@ export const updateInvoiceValidation = [
   body('amount')
     .optional()
     .isFloat({ min: 0 })
-    .withMessage('Amount must be a positive number.'),
+    .withMessage('Amount must be a positive number.')
+    .toFloat(),
   body('status')
     .optional()
     .isIn(['PENDING', 'PAID', 'CANCELLED'])

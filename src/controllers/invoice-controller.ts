@@ -7,7 +7,7 @@ class InvoiceController {
     const { taxProfileId, amount, status, currency } = req.body;
     const invoice = await InvoiceService.createInvoice(req.userId!, {
       taxProfileId,
-      amount: Number(amount),
+      amount,
       status,
       currency
     });
