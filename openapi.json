@@ -1,0 +1,954 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Recruitment Backend API",
+    "version": "1.0.0",
+    "description": "API documentation for the Recruitment Backend"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001",
+      "description": "Local server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Invoice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The auto-generated id of the invoice"
+          },
+          "taxProfileId": {
+            "type": "string",
+            "description": "The tax profile id association"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The invoice creation date"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The invoice last update date"
+          },
+          "amount": {
+            "type": "number",
+            "description": "The invoice amount"
+          },
+          "status": {
+            "type": "string",
+            "description": "The invoice status. Possible values [ PAID, PENDING, FAILED ]"
+          },
+          "currency": {
+            "type": "string",
+            "description": "The invoice currency. Possible values [ EUR, USD, GBP ]"
+          }
+        },
+        "example": {
+          "id": "d5fE_asz",
+          "taxProfileId": "asd151",
+          "createdAt": "2023-10-01T12:00:00Z",
+          "amount": 100.5,
+          "status": "PAID",
+          "currency": "EUR"
+        }
+      },
+      "TaxProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The auto-generated id of the tax profile"
+          },
+          "userId": {
+            "type": "string",
+            "description": "The user id association"
+          },
+          "legalName": {
+            "type": "string",
+            "description": "The legal name of the entity"
+          },
+          "vatNumber": {
+            "type": "string",
+            "description": "The VAT number"
+          },
+          "address": {
+            "type": "string",
+            "description": "The address"
+          },
+          "city": {
+            "type": "string",
+            "description": "The city"
+          },
+          "zipCode": {
+            "type": "string",
+            "description": "The zip code"
+          },
+          "country": {
+            "type": "string",
+            "description": "The country"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The tax profile creation date"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The tax profile last update date"
+          }
+        },
+        "example": {
+          "id": "d5fE_asz",
+          "userId": "userId1234",
+          "legalName": "Acme Corp",
+          "vatNumber": "IT12345678901",
+          "address": "Via Roma 1",
+          "city": "Rome",
+          "zipCode": 100,
+          "country": "Italy"
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The auto-generated id of the user"
+          },
+          "email": {
+            "type": "string",
+            "description": "The user email"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "The user first name"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The user last name"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "description": "The user birth date"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The user creation date"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The user last update date"
+          }
+        },
+        "example": {
+          "id": "d5fE_asz",
+          "email": "test@test.com",
+          "firstName": "John",
+          "lastName": "Doe",
+          "birthDate": "1990-01-01"
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/invoice": {
+      "get": {
+        "summary": "Returns the list of invoices of the logged user or the invoices of a specific tax profile",
+        "tags": [
+          "Invoice"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "taxProfileId",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Filter by tax profile id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of invoices",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "invoices": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Invoice"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new invoice",
+        "tags": [
+          "Invoice"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "taxProfileId",
+                  "amount",
+                  "status",
+                  "currency"
+                ],
+                "properties": {
+                  "taxProfileId": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0,
+                    "example": 100.5
+                  },
+                  "status": {
+                    "type": "string",
+                    "example": "PAID",
+                    "enum": [
+                      "PAID",
+                      "PENDING",
+                      "FAILED"
+                    ]
+                  },
+                  "currency": {
+                    "type": "string",
+                    "example": "EUR",
+                    "enum": [
+                      "EUR",
+                      "USD",
+                      "GBP"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The invoice was successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "invoice": {
+                      "$ref": "#/components/schemas/Invoice"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tax Profile not found or does not belong to user"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/invoice/{id}": {
+      "get": {
+        "summary": "Get an invoice by id",
+        "tags": [
+          "Invoice"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The invoice id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The invoice description by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "invoice": {
+                      "$ref": "#/components/schemas/Invoice"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The invoice was not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an invoice",
+        "tags": [
+          "Invoice"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The invoice id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "currency": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The invoice was updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "invoice": {
+                      "$ref": "#/components/schemas/Invoice"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invoice not found or does not belong to user."
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove the invoice by id",
+        "tags": [
+          "Invoice"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The invoice id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The invoice was deleted"
+          },
+          "404": {
+            "description": "Invoice not found or does not belong to user."
+          }
+        }
+      }
+    },
+    "/tax-profile": {
+      "get": {
+        "summary": "Returns the list of all tax profiles for the user",
+        "tags": [
+          "TaxProfile"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "take",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of tax profiles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "taxProfiles": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TaxProfile"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new tax profile",
+        "tags": [
+          "TaxProfile"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "legalName",
+                  "vatNumber",
+                  "address",
+                  "city",
+                  "zipCode",
+                  "country"
+                ],
+                "properties": {
+                  "legalName": {
+                    "type": "string",
+                    "example": "Multidialogo"
+                  },
+                  "vatNumber": {
+                    "type": "string",
+                    "example": "IT01234567890"
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "Via Roma 1"
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "Torino"
+                  },
+                  "zipCode": {
+                    "type": "string",
+                    "example": 10123
+                  },
+                  "country": {
+                    "type": "string",
+                    "example": "Italy"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The tax profile was successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "taxProfile": {
+                      "$ref": "#/components/schemas/TaxProfile"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/tax-profile/{id}": {
+      "get": {
+        "summary": "Get a tax profile by id",
+        "tags": [
+          "TaxProfile"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The tax profile id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The tax profile description by id",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "taxProfile": {
+                      "$ref": "#/components/schemas/TaxProfile"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The tax profile was not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a tax profile",
+        "tags": [
+          "TaxProfile"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The tax profile id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "legalName": {
+                    "type": "string",
+                    "example": "Multidialogo"
+                  },
+                  "vatNumber": {
+                    "type": "string",
+                    "example": "IT01234567890"
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "Via Roma 1"
+                  },
+                  "city": {
+                    "type": "string",
+                    "example": "Torino"
+                  },
+                  "zipCode": {
+                    "type": "string",
+                    "example": 10123
+                  },
+                  "country": {
+                    "type": "string",
+                    "example": "Italy"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The tax profile was updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "taxProfile": {
+                      "$ref": "#/components/schemas/TaxProfile"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The tax profile was not found"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove the tax profile by id",
+        "tags": [
+          "TaxProfile"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The tax profile id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The tax profile was deleted"
+          },
+          "404": {
+            "description": "The tax profile was not found"
+          }
+        }
+      }
+    },
+    "/user/signup": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "test@test.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "testtest"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The user was successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "jwt": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User already registered"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/user/login": {
+      "post": {
+        "summary": "Log in a user",
+        "tags": [
+          "User"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "test@test.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "testtest"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The user was successfully logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "jwt": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "summary": "Get the current user profile",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update the current user profile",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "test@test.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "testtest"
+                  },
+                  "firstName": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "example": "Doe"
+                  },
+                  "birthDate": {
+                    "type": "string",
+                    "format": "date",
+                    "example": "1990-01-01"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated user profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "422": {
+            "description": "Validation error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete the current user profile",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user profile was deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}

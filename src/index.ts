@@ -8,7 +8,7 @@ import errorRouter from "./middlewares/error-route.js";
 import userRouter from "./routers/user-router.js";
 import taxProfileRouter from "./routers/tax-profile-router.js";
 import invoiceRouter from "./routers/invoice-router.js";
-import swaggerDocument from "./config/swagger.js";
+import swaggerDocument from "./utils/swagger.js";
 import logger from "./utils/logger.js";
 import requestLogger from "./middlewares/request-logger.js";
 
