@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import ReqValidationError from '../types/req-validation-error.js';
+import ReqValidationError from '../types/request-validation-error.js';
 import logger from '../utils/logger.js';
 
 export default (error: Error, req: Request, res: Response, _next: NextFunction) => {

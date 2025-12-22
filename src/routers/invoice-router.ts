@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import InvoiceController from '../controllers/invoice-controller.js';
 import { isAuth } from '../middlewares/is-auth.js';
-import { validateRequest } from '../middlewares/req-validation.js';
+import { validateRequest } from '../middlewares/request-validation.js';
 import { saveInvoiceValidation, updateInvoiceValidation } from '../utils/validators/invoice-validators.js';
 
 const router = Router();

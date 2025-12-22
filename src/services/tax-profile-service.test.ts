@@ -2,7 +2,7 @@ import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import { TaxProfileService } from "./tax-profile-service.js";
 import { Prisma } from '../generated/prisma/client.js';
-import ReqValidationError from '../types/req-validation-error.js';
+import ReqValidationError from '../types/request-validation-error.js';
 
 describe('TaxProfileService', () => {
   let taxProfileService: TaxProfileService;

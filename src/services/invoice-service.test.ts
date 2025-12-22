@@ -2,7 +2,7 @@ import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import { InvoiceService } from "./invoice-service.js";
 import { Prisma, InvoiceStatus, Currency } from '../generated/prisma/client.js';
-import ReqValidationError from "../types/req-validation-error.js";
+import ReqValidationError from "../types/request-validation-error.js";
 
 describe('InvoiceService', () => {
   let invoiceService: InvoiceService;

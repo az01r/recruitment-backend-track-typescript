@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import TaxProfileController from '../controllers/tax-profile-controller.js';
 import { isAuth } from '../middlewares/is-auth.js';
-import { validateRequest } from '../middlewares/req-validation.js';
+import { validateRequest } from '../middlewares/request-validation.js';
 import { createValidation, updateValidation } from '../utils/validators/tax-profile-validators.js';
 
 const router = Router();

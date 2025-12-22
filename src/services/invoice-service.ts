@@ -1,6 +1,6 @@
 import prismaClientSingleton from "../utils/prisma.js";
 import { Prisma, PrismaClient } from "../generated/prisma/client.js";
-import ReqValidationError from "../types/req-validation-error.js";
+import ReqValidationError from "../types/request-validation-error.js";
 
 class InvoiceService {
   private prismaClient: PrismaClient;
