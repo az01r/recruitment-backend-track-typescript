@@ -485,7 +485,20 @@
         ],
         "responses": {
           "200": {
-            "description": "The invoice was deleted"
+            "description": "The invoice was deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Invoice deleted."
+                    }
+                  }
+                }
+              }
+            }
           },
           "404": {
             "description": "Invoice not found or does not belong to user."
@@ -806,7 +819,20 @@
         ],
         "responses": {
           "200": {
-            "description": "The tax profile was deleted"
+            "description": "The tax profile was deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tax profile deleted."
+                    }
+                  }
+                }
+              }
+            }
           },
           "404": {
             "description": "The tax profile was not found"
@@ -1038,7 +1064,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "User deleted."
+                    }
+                  }
                 }
               }
             }

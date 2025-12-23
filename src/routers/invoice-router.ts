@@ -269,6 +269,14 @@ router.put('/:id', isAuth, updateInvoiceValidation, validateRequest, InvoiceCont
  *     responses:
  *       200:
  *         description: The invoice was deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invoice deleted.
  *       404:
  *         description: Invoice not found or does not belong to user.
  */
