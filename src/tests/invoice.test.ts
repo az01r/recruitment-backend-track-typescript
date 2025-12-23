@@ -67,11 +67,13 @@ describe('Integration Tests: Invoice', () => {
       await prisma.taxProfile.deleteMany({
         where: { userId }
       });
-      await prisma.user.deleteMany({
-        where: { email: { endsWith: '@example.com' } }
+      await prisma.user.delete({
+        where: { id: userId }
       });
     } catch (error) {
       console.error('Cleanup failed:', error);
+    } finally {
+      await prisma.$disconnect();
     }
   });
 

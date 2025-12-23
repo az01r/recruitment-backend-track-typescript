@@ -49,19 +49,16 @@ describe('Integration Tests: Tax Profile', () => {
 
   after(async () => {
     try {
-      await prisma.invoice.deleteMany({
-        where: {
-          taxProfile: { userId }
-        }
-      });
       await prisma.taxProfile.deleteMany({
         where: { userId }
       });
-      await prisma.user.deleteMany({
-        where: { email: { endsWith: '@example.com' } }
+      await prisma.user.delete({
+        where: { id: userId }
       });
     } catch (error) {
       console.error('Cleanup failed:', error);
+    } finally {
+      await prisma.$disconnect();
     }
   });
 

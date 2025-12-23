@@ -17,14 +17,12 @@ describe('Integration Tests: User', () => {
   after(async () => {
     try {
       await prisma.user.deleteMany({
-        where: {
-          email: {
-            endsWith: '@example.com'
-          }
-        }
+        where: { email: { endsWith: '@example.com' } }
       });
     } catch (error) {
       console.error('Cleanup failed:', error);
+    } finally {
+      await prisma.$disconnect();
     }
   });
 
