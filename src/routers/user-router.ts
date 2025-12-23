@@ -208,7 +208,11 @@ router.put('/', isAuth, updateValidation, validateRequest, UserController.update
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User deleted.
  *       404:
  *         description: User not found
  */
