@@ -9,65 +9,38 @@ class TaxProfileService {
     this.prismaClient = prismaClient;
   }
 
-  createTaxProfile = async (userId: string, data: Prisma.TaxProfileCreateWithoutUserInput) => {
-    return await this.prismaClient.taxProfile.create({
-      data: {
-        ...data,
-        userId
-      }
-    });
+  createTaxProfile = async (data: Prisma.TaxProfileCreateInput) => {
+    return await this.prismaClient.taxProfile.create({ data });
   }
 
-  findTaxProfilesByUserId = async (userId: string, skip: number, take: number) => {
+  findManyTaxProfiles = async (where: Prisma.TaxProfileWhereInput, skip?: number, take?: number) => {
     return await this.prismaClient.taxProfile.findMany({
-      skip,
-      take,
-      where: {
-        userId
-      },
+      skip: skip || 0,
+      take: take || 10,
+      where,
       orderBy: {
         createdAt: "desc"
       }
     });
   }
 
-  findTaxProfileByIdAndUserId = async (userId: string, taxProfileId: string) => {
-    return await this.prismaClient.taxProfile.findUnique({
-      where: {
-        id: taxProfileId,
-        userId
-      }
-    });
+  findUniqueTaxProfile = async (where: Prisma.TaxProfileWhereUniqueInput) => {
+    return await this.prismaClient.taxProfile.findUnique({ where });
   }
 
-  updateTaxProfile = async (userId: string, taxProfileId: string, data: Prisma.TaxProfileUpdateWithoutUserInput) => {
-    await this.validateTaxProfileOwnership(userId, taxProfileId);
+  updateTaxProfile = async (where: Prisma.TaxProfileWhereUniqueInput, data: Prisma.TaxProfileUpdateWithoutUserInput) => {
+    await this.validateTaxProfileOwnership(where);
 
-    return await this.prismaClient.taxProfile.update({
-      where: {
-        id: taxProfileId
-      },
-      data
-    });
+    return await this.prismaClient.taxProfile.update({ data, where });
   }
 
-  deleteTaxProfile = async (userId: string, taxProfileId: string) => {
-    await this.validateTaxProfileOwnership(userId, taxProfileId);
-    return await this.prismaClient.taxProfile.delete({
-      where: {
-        id: taxProfileId
-      }
-    });
+  deleteTaxProfile = async (where: Prisma.TaxProfileWhereUniqueInput) => {
+    await this.validateTaxProfileOwnership(where);
+    return await this.prismaClient.taxProfile.delete({ where });
   }
 
-  private validateTaxProfileOwnership = async (userId: string, taxProfileId: string) => {
-    const taxProfile = await this.prismaClient.taxProfile.findUnique({
-      where: {
-        id: taxProfileId,
-        userId
-      }
-    });
-
+  private validateTaxProfileOwnership = async (where: Prisma.TaxProfileWhereUniqueInput) => {
+    const taxProfile = await this.findUniqueTaxProfile(where);
     if (!taxProfile) {
       throw new ReqValidationError({ message: "Tax Profile not found or does not belong to user.", statusCode: 404 });
     }

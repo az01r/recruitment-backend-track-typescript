@@ -75,6 +75,31 @@ const router = Router();
  *         required: false
  *         schema:
  *           type: integer
+ *       - name: legalName
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: vatNumber
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: city
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: country
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - name: zipCode
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: The list of tax profiles

@@ -4,20 +4,20 @@ import TaxProfileController from './tax-profile-controller.js';
 import TaxProfileService from '../services/tax-profile-service.js';
 
 mock.method(TaxProfileService, 'createTaxProfile');
-mock.method(TaxProfileService, 'findTaxProfilesByUserId');
-mock.method(TaxProfileService, 'findTaxProfileByIdAndUserId');
+mock.method(TaxProfileService, 'findManyTaxProfiles');
+mock.method(TaxProfileService, 'findUniqueTaxProfile');
 mock.method(TaxProfileService, 'updateTaxProfile');
 mock.method(TaxProfileService, 'deleteTaxProfile');
 
-describe('UserController', () => {
+describe('TaxProfileController', () => {
   let req: any;
   let res: any;
   let next: any;
 
   beforeEach(() => {
     (TaxProfileService.createTaxProfile as any).mock.resetCalls();
-    (TaxProfileService.findTaxProfilesByUserId as any).mock.resetCalls();
-    (TaxProfileService.findTaxProfileByIdAndUserId as any).mock.resetCalls();
+    (TaxProfileService.findManyTaxProfiles as any).mock.resetCalls();
+    (TaxProfileService.findUniqueTaxProfile as any).mock.resetCalls();
     (TaxProfileService.updateTaxProfile as any).mock.resetCalls();
     (TaxProfileService.deleteTaxProfile as any).mock.resetCalls();
 
@@ -69,13 +69,13 @@ describe('UserController', () => {
         { id: '1', legalName: 'Test', vatNumber: '123456789', address: '123 Test St', city: 'Test City', zipCode: '12345', country: 'Test Country', createdAt: new Date(), updatedAt: new Date(), userId: 'user123' },
         { id: '2', legalName: 'Test', vatNumber: '123456789', address: '123 Test St', city: 'Test City', zipCode: '12345', country: 'Test Country', createdAt: new Date(), updatedAt: new Date(), userId: 'user123' },
       ];
-      (TaxProfileService.findTaxProfilesByUserId as any).mock.mockImplementationOnce(() => Promise.resolve(taxProfiles));
+      (TaxProfileService.findManyTaxProfiles as any).mock.mockImplementationOnce(() => Promise.resolve(taxProfiles));
 
       await TaxProfileController.getTaxProfiles(req, res, next);
 
       assert.strictEqual(res.statusCode, 200);
       assert.deepStrictEqual(res.jsonData, { taxProfiles });
-      assert.strictEqual((TaxProfileService.findTaxProfilesByUserId as any).mock.callCount(), 1);
+      assert.strictEqual((TaxProfileService.findManyTaxProfiles as any).mock.callCount(), 1);
     });
   });
 
@@ -85,19 +85,19 @@ describe('UserController', () => {
       req.params = { id: '1' };
 
       const taxProfile = { id: '1', legalName: 'Test', vatNumber: '123456789', address: '123 Test St', city: 'Test City', zipCode: '12345', country: 'Test Country', createdAt: new Date(), updatedAt: new Date(), userId: 'user123' };
-      (TaxProfileService.findTaxProfileByIdAndUserId as any).mock.mockImplementationOnce(() => Promise.resolve(taxProfile));
+      (TaxProfileService.findUniqueTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(taxProfile));
 
       await TaxProfileController.getTaxProfile(req, res, next);
 
       assert.strictEqual(res.statusCode, 200);
       assert.deepStrictEqual(res.jsonData, { taxProfile });
-      assert.strictEqual((TaxProfileService.findTaxProfileByIdAndUserId as any).mock.callCount(), 1);
+      assert.strictEqual((TaxProfileService.findUniqueTaxProfile as any).mock.callCount(), 1);
     });
 
     it('should throw error if tax profile not found', async () => {
       req.userId = 'user123';
       req.params = { id: 'notFound' };
-      (TaxProfileService.findTaxProfileByIdAndUserId as any).mock.mockImplementationOnce(() => Promise.resolve(null));
+      (TaxProfileService.findUniqueTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await assert.rejects(
         async () => {
@@ -110,7 +110,7 @@ describe('UserController', () => {
           return true;
         }
       );
-      assert.strictEqual((TaxProfileService.findTaxProfileByIdAndUserId as any).mock.callCount(), 1);
+      assert.strictEqual((TaxProfileService.findUniqueTaxProfile as any).mock.callCount(), 1);
     });
   });
 
