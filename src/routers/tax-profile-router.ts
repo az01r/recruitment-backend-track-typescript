@@ -275,6 +275,14 @@ router.put('/:id', isAuth, updateValidation, validateRequest, TaxProfileControll
  *     responses:
  *       200:
  *         description: The tax profile was deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Tax profile deleted.
  *       404:
  *         description: The tax profile was not found
  */
