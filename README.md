@@ -53,15 +53,21 @@ Other than errors, requests and responses are also logged with the following inf
 - Response status code
 - Response duration
 
-## Unit Tests
+## Tests
 
 Unit tests are realized using the node built in test package.
+
+Integration tests are realized with supertest library.
 
 You can run tests directly in the container with the following (avaiable only if NODE_ENV !== 'production'):
 
     docker-compose exec recruitment-backend node --import tsx --test src/**/*.test.ts
 
-If you prefer to install everything locally in the package.json a test command is already setted (npm run test).
+or with the already setted npm script:
+
+    docker compose exec recruitment-backend npm run test
+
+Note that to successfully run the integration tests you need to have the backend and the database containers running.
 
 ## How to run the project
 

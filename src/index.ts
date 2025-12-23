@@ -20,8 +20,6 @@ app.use(helmet()); // Security headers
 
 app.use(corsManager);
 
-app.use(requestLogger);
-
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/user", userRouter);
@@ -32,7 +30,14 @@ app.use(notFoundRouter);
 
 app.use(errorRouter);
 
-app.listen(process.env.BACKEND_PORT || 3000, () => {
-  logger.info(`Server started on port ${process.env.BACKEND_PORT || 3000}`);
-  logger.info(`Swagger docs available at http://localhost:${process.env.BACKEND_PORT || 3000}/api-docs`);
-});
+if (process.argv[1] === new URL(import.meta.url).pathname) {
+
+  app.use(requestLogger);
+
+  app.listen(process.env.BACKEND_PORT || 3000, () => {
+    logger.info(`Server started on port ${process.env.BACKEND_PORT || 3000}`);
+    logger.info(`Swagger docs available at http://localhost:${process.env.BACKEND_PORT || 3000}/api-docs`);
+  });
+}
+
+export default app;
