@@ -25,7 +25,7 @@ describe('UserService', () => {
 
   describe('createUser', () => {
     it('should create a new user', async () => {
-      const userData = { email: 'test@test.com', password: 'testtest' };
+      const userData: Prisma.UserCreateInput = { email: 'test@test.com', password: 'testtest' };
 
       const createdUser = { id: '1', ...userData, createdAt: new Date(), updatedAt: new Date() };
       prismaMock.user.create.mock.mockImplementationOnce(() => Promise.resolve(createdUser));
@@ -38,50 +38,41 @@ describe('UserService', () => {
       assert.strictEqual(prismaMock.user.create.mock.callCount(), 1);
     });
 
-    describe('findUserByEmail', () => {
+    describe('findUser', () => {
       it('should find a user by email', async () => {
-        const email = 'test@test.com';
+        const where: Prisma.UserWhereUniqueInput = { email: 'test@test.com' };
 
-        const user = { id: '1', email, password: 'testtest' };
+        const user = { id: '1', email: 'test@test.com', password: 'testtest' };
         prismaMock.user.findUnique.mock.mockImplementationOnce(() => Promise.resolve(user));
 
-        const result = await userService.findUserByEmail(email);
+        const result = await userService.findUser(where);
 
         const callArgs = prismaMock.user.findUnique.mock.calls[0].arguments[0];
-        assert.deepStrictEqual(callArgs, { where: { email } });
+        assert.deepStrictEqual(callArgs, { where });
         assert.deepStrictEqual(result, user);
         assert.strictEqual(prismaMock.user.findUnique.mock.callCount(), 1);
       });
 
-      it('should return null if user was not found', async () => {
-        prismaMock.user.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
-        const result = await userService.findUserByEmail('notfound@test.com');
-        assert.strictEqual(result, null);
-        assert.strictEqual(prismaMock.user.findUnique.mock.callCount(), 1);
-      });
-    });
-
-    describe('findUserById', () => {
       it('should find a user by id', async () => {
-        const id = '1';
+        const where: Prisma.UserWhereUniqueInput = { id: '1' };
 
-        const user = { id, email: 'test@test.com' };
+        const user = { id: '1', email: 'test@test.com', password: 'testtest' };
         prismaMock.user.findUnique.mock.mockImplementationOnce(() => Promise.resolve(user));
 
-        const result = await userService.findUserById(id);
+        const result = await userService.findUser(where);
 
         const callArgs = prismaMock.user.findUnique.mock.calls[0].arguments[0];
-        assert.deepStrictEqual(callArgs, { where: { id } });
+        assert.deepStrictEqual(callArgs, { where });
         assert.deepStrictEqual(result, user);
         assert.strictEqual(prismaMock.user.findUnique.mock.callCount(), 1);
       });
 
       it('should return null if user was not found', async () => {
-        const id = 'notfound';
+        const where: Prisma.UserWhereUniqueInput = { email: 'notfound@test.com' };
 
         prismaMock.user.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
 
-        const result = await userService.findUserById(id);
+        const result = await userService.findUser(where);
 
         assert.strictEqual(result, null);
         assert.strictEqual(prismaMock.user.findUnique.mock.callCount(), 1);
@@ -90,26 +81,27 @@ describe('UserService', () => {
 
     describe('updateUser', () => {
       it('should update a user', async () => {
-        const id = '1';
-        const updateData: Prisma.UserUpdateInput = { firstName: 'Updated Name' };
+        const where: Prisma.UserWhereUniqueInput = { id: '1' };
+        const data: Prisma.UserUpdateInput = { firstName: 'Updated Name' };
 
-        const updatedUser = { id, email: 'test@test.com', ...updateData };
+        const updatedUser = { id: '1', email: 'test@test.com', ...data };
         prismaMock.user.update.mock.mockImplementationOnce(() => Promise.resolve(updatedUser));
 
-        const result = await userService.updateUser(id, updateData);
+        const result = await userService.updateUser(where, data);
 
         const callArgs = prismaMock.user.update.mock.calls[0].arguments[0];
-        assert.deepStrictEqual(callArgs, { where: { id }, data: updateData });
+        assert.deepStrictEqual(callArgs, { where, data });
         assert.deepStrictEqual(result, updatedUser);
         assert.strictEqual(prismaMock.user.update.mock.callCount(), 1);
       });
 
       it('should return null if user was not found', async () => {
-        const id = 'notfound';
+        const where: Prisma.UserWhereUniqueInput = { id: 'notfound' };
+        const data: Prisma.UserUpdateInput = { firstName: 'Updated Name' };
 
         prismaMock.user.update.mock.mockImplementationOnce(() => Promise.resolve(null));
 
-        const result = await userService.updateUser(id, { firstName: 'Updated Name' });
+        const result = await userService.updateUser(where, data);
 
         assert.strictEqual(result, null);
         assert.strictEqual(prismaMock.user.update.mock.callCount(), 1);
@@ -118,25 +110,25 @@ describe('UserService', () => {
 
     describe('deleteUser', () => {
       it('should delete a user', async () => {
-        const id = '1';
+        const where: Prisma.UserWhereUniqueInput = { id: '1' };
 
-        const deletedUser = { id, email: 'test@test.com' };
+        const deletedUser = { id: '1', email: 'test@test.com' };
         prismaMock.user.delete.mock.mockImplementationOnce(() => Promise.resolve(deletedUser));
 
-        const result = await userService.deleteUser(id);
+        const result = await userService.deleteUser(where);
 
         const callArgs = prismaMock.user.delete.mock.calls[0].arguments[0];
-        assert.deepStrictEqual(callArgs, { where: { id } });
+        assert.deepStrictEqual(callArgs, { where });
         assert.deepStrictEqual(result, deletedUser);
         assert.strictEqual(prismaMock.user.delete.mock.callCount(), 1);
       });
 
       it('should return null if user was not found', async () => {
-        const id = 'notfound';
+        const where: Prisma.UserWhereUniqueInput = { id: 'notfound' };
 
         prismaMock.user.delete.mock.mockImplementationOnce(() => Promise.resolve(null));
 
-        const result = await userService.deleteUser(id);
+        const result = await userService.deleteUser(where);
 
         assert.strictEqual(result, null);
         assert.strictEqual(prismaMock.user.delete.mock.callCount(), 1);

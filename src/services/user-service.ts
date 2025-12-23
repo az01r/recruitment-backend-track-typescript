@@ -8,43 +8,20 @@ class UserService {
     this.prismaClient = prismaClient;
   }
 
-  createUser = async (userData: Prisma.UserCreateInput) => {
-    return await this.prismaClient.user.create({
-      data: userData
-    });
+  createUser = async (data: Prisma.UserCreateInput) => {
+    return await this.prismaClient.user.create({ data });
   }
 
-  findUserByEmail = async (email: string) => {
-    return await this.prismaClient.user.findUnique({
-      where: {
-        email: email
-      }
-    });
+  findUser = async (where: Prisma.UserWhereUniqueInput) => {
+    return await this.prismaClient.user.findUnique({ where });
   }
 
-  findUserById = async (id: string) => {
-    return await this.prismaClient.user.findUnique({
-      where: {
-        id
-      }
-    });
+  updateUser = async (where: Prisma.UserWhereUniqueInput, data: Prisma.UserUpdateInput) => {
+    return await this.prismaClient.user.update({ where, data });
   }
 
-  updateUser = async (id: string, userData: Prisma.UserUpdateInput) => {
-    return await this.prismaClient.user.update({
-      where: {
-        id
-      },
-      data: userData
-    });
-  }
-
-  deleteUser = async (id: string) => {
-    return await this.prismaClient.user.delete({
-      where: {
-        id
-      }
-    });
+  deleteUser = async (where: Prisma.UserWhereUniqueInput) => {
+    return await this.prismaClient.user.delete({ where });
   }
 }
 
