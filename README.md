@@ -1,6 +1,35 @@
 # recruitment-backend-track-typescript
 An evaluation exercise for candidates willing to test their back-end capabilities. Typescript language track
 
+## TL;DR
+
+```bash
+docker compose up --build
+docker-compose exec recruitment-backend npx prisma migrate dev
+docker-compose exec recruitment-backend npm run test
+```
+
+Example of environment variables (replace these with your own values):
+
+```bash
+BACKEND_PORT=3001
+DATABASE_URL="mysql://your-user:your-password@localhost:3306/your-database" # used by npx prisma migrate
+DATABASE_HOST="recruitment-db" # used by PrismaClient
+DATABASE_ROOT_PASSWORD="root"
+DATABASE_USER="your-user"
+DATABASE_PASSWORD="your-password"
+DATABASE_NAME="your-database"
+DATABASE_PORT=3307
+JWT_SECRET="secret"
+JWT_DURATION="4h"
+NODE_ENV="development"
+LOG_LEVEL="info" # Possible values: trace, debug, info, warn, error, fatal
+ALLOW_PUBLIC_KEY_RETRIEVAL=true # Necessary for integration test
+SSL=false # Necessary for integration test
+```
+
+Swagger docs available at http://localhost:${process.env.BACKEND_PORT || 3000}/api-docs
+
 ## Project structure
 
 ```
@@ -8,8 +37,9 @@ src/
 ├── controllers/
 ├── generated/
 ├── middlewares/
-├── routes/
+├── routers/
 ├── services/
+├── tests/
 ├── types/
 └── utils/
 ```
@@ -61,11 +91,15 @@ Integration tests are realized with supertest library.
 
 You can run tests directly in the container with the following (avaiable only if NODE_ENV !== 'production'):
 
+```bash
     docker-compose exec recruitment-backend node --import tsx --test src/**/*.test.ts
+```
 
 or with the already setted npm script:
 
+```bash
     docker compose exec recruitment-backend npm run test
+```
 
 Note that to successfully run the integration tests you need to have the backend and the database containers running.
 
@@ -77,8 +111,10 @@ The project is shipped with a docker-compose file to ease the setup of the envir
 
 To run the project with docker compose you can run the following commands:
 
+```bash
     docker compose up --build
     docker-compose exec recruitment-backend npx prisma migrate dev
+```
 
 The first command will build the backend image and start both the db and the backend containers.
 
@@ -86,7 +122,9 @@ The second command will run the database migrations. Note that it needs to be ex
 
 To stop the project you can run:
 
+```bash
     docker compose down
+```
 
 If NODE_ENV env variable is setted to `production`, the project will transpile the TypeScript code when creating backend image and will instal only production dependencies.
 Note that there still is a bind mount in the backend volumes that binds to the local code directory.
@@ -99,4 +137,6 @@ The swagger does not utilize it directly. Instead it uses options provided in th
 
 To generate the openapi.json file you can run the following command (defined in the package.json):
 
+```bash
     npm run openapi
+```
