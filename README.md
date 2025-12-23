@@ -13,7 +13,7 @@ Example of environment variables (replace these with your own values):
 
 ```bash
 BACKEND_PORT=3001
-DATABASE_URL="mysql://your-user:your-password@localhost:3306/your-database" # used by npx prisma migrate
+DATABASE_URL="mysql://your-user:your-password@recruitment-db:3306/your-database" # used by npx prisma migrate
 DATABASE_HOST="recruitment-db" # used by PrismaClient
 DATABASE_ROOT_PASSWORD="root"
 DATABASE_USER="your-user"
