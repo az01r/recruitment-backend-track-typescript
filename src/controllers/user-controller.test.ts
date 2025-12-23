@@ -224,7 +224,7 @@ describe('UserController', () => {
       await UserController.deleteUser(req, res, next);
 
       assert.strictEqual(res.statusCode, 200);
-      assert.deepStrictEqual(res.jsonData, mockUser);
+      assert.deepStrictEqual(res.jsonData, { message: 'User deleted.' });
       assert.strictEqual((UserService.deleteUser as any).mock.callCount(), 1);
     });
 
