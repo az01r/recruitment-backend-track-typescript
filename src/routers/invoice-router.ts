@@ -60,6 +60,38 @@ const router = Router();
  *           type: string
  *         required: false
  *         description: Filter by tax profile id
+ *       - in: query
+ *         name: skip
+ *         schema:
+ *           type: number
+ *         required: false
+ *         description: Skip the first n invoices
+ *       - in: query
+ *         name: take
+ *         schema:
+ *           type: number
+ *         required: false
+ *         description: Take the next n invoices
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum:
+ *             - PAID
+ *             - PENDING
+ *             - FAILED
+ *         required: false
+ *         description: Filter by status
+ *       - in: query
+ *         name: currency
+ *         schema:
+ *           type: string
+ *           enum:
+ *             - EUR
+ *             - USD
+ *             - GBP
+ *         required: false
+ *         description: Filter by currency
  *     responses:
  *       200:
  *         description: The list of invoices
@@ -73,7 +105,7 @@ const router = Router();
  *                   items:
  *                     $ref: '#/components/schemas/Invoice'
  */
-router.get('/', isAuth, InvoiceController.getUserInvoices);
+router.get('/', isAuth, InvoiceController.getInvoices);
 
 /**
  * @swagger
@@ -186,10 +218,22 @@ router.post('/', isAuth, saveInvoiceValidation, validateRequest, InvoiceControll
  *             properties:
  *               amount:
  *                 type: number
+ *                 minimum: 0
+ *                 example: 100.50
  *               status:
  *                 type: string
+ *                 example: PAID
+ *                 enum:
+ *                   - PAID
+ *                   - PENDING
+ *                   - FAILED
  *               currency:
  *                 type: string
+ *                 example: EUR
+ *                 enum:
+ *                   - EUR
+ *                   - USD
+ *                   - GBP
  *     responses:
  *       200:
  *         description: The invoice was updated
