@@ -2,6 +2,7 @@ import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import TaxProfileController from './tax-profile-controller.js';
 import TaxProfileService from '../services/tax-profile-service.js';
+import { Prisma } from '../generated/prisma/client.js';
 
 mock.method(TaxProfileService, 'createTaxProfile');
 mock.method(TaxProfileService, 'findTaxProfiles');
@@ -76,6 +77,18 @@ describe('TaxProfileController', () => {
       assert.strictEqual(res.statusCode, 200);
       assert.deepStrictEqual(res.jsonData, { taxProfiles });
       assert.strictEqual((TaxProfileService.findTaxProfiles as any).mock.callCount(), 1);
+    });
+
+    it('should use query params to filter tax profiles', async () => {
+      req.query = { userId: 'user123', skip: '10', take: '20', legalName: 'Legal Name', vatNumber: 'VAT Number', city: 'City', country: 'Country', zipCode: '12345' };
+      const where: Prisma.TaxProfileWhereInput = { userId: { equals: 'user123' }, legalName: { contains: 'Legal Name' }, vatNumber: { contains: 'VAT Number' }, city: { contains: 'City' }, country: { contains: 'Country' }, zipCode: { contains: '12345' } };
+
+      (TaxProfileService.findTaxProfiles as any).mock.mockImplementationOnce(() => Promise.resolve([]));
+
+      await TaxProfileController.getTaxProfiles(req, res, next);
+
+      const callArgs = (TaxProfileService.findTaxProfiles as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [where, Number(req.query.skip), Number(req.query.take)]);
     });
   });
 

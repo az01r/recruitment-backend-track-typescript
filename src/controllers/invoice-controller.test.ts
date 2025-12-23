@@ -103,6 +103,18 @@ describe('InvoiceController', () => {
 
       assert.strictEqual(res.statusCode, 200);
     });
+
+    it('should use query params to filter invoices', async () => {
+      req.query = { taxProfileId: 'taxProfile123', skip: '10', take: '20', status: 'PENDING', currency: 'EUR' };
+      const { taxProfileId, skip, take, status, currency } = req.query;
+
+      (InvoiceService.findInvoices as any).mock.mockImplementationOnce(() => Promise.resolve([]));
+
+      await InvoiceController.getInvoices(req, res, next);
+
+      const callArgs = (InvoiceService.findInvoices as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [{ taxProfile: { userId: 'user123' }, taxProfileId, status, currency }, Number(skip), Number(take)]);
+    });
   });
 
   describe('getInvoice', () => {
