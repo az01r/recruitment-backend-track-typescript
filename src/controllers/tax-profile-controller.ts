@@ -16,14 +16,14 @@ class TaxProfileController {
 
     const where: Prisma.TaxProfileWhereInput = {};
 
-    where.userId = req.userId!;
+    where.userId = { equals: req.userId! };
     if (legalName) where.legalName = { contains: String(legalName) };
     if (vatNumber) where.vatNumber = { contains: String(vatNumber) };
     if (city) where.city = { contains: String(city) };
     if (country) where.country = { contains: String(country) };
     if (zipCode) where.zipCode = { contains: String(zipCode) };
 
-    const taxProfiles = await TaxProfileService.findManyTaxProfiles(where, Number(skip), Number(take));
+    const taxProfiles = await TaxProfileService.findTaxProfiles(where, Number(skip), Number(take));
     res.status(200).json({ taxProfiles });
   }
 

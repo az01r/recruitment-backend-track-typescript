@@ -41,7 +41,7 @@ describe('TaxProfileService', () => {
     });
   });
 
-  describe('findManyTaxProfiles', () => {
+  describe('findTaxProfiles', () => {
     it('should find all tax profiles of an user', async () => {
       const skip = 0;
       const take = 10;
@@ -51,7 +51,7 @@ describe('TaxProfileService', () => {
       const taxProfiles = [{ user: { connect: { id: '1' } }, id: '1', legalName: 'Test Legal Name', vatNumber: 'IT1234567890', address: 'Test Address', city: 'Test City', zipCode: '12345', country: 'Test Country', createdAt: new Date(), updatedAt: new Date() }];
       prismaMock.taxProfile.findMany.mock.mockImplementationOnce(() => Promise.resolve(taxProfiles));
 
-      const result = await taxProfileService.findManyTaxProfiles(where, skip, take);
+      const result = await taxProfileService.findTaxProfiles(where, skip, take);
 
       const callArgs = prismaMock.taxProfile.findMany.mock.calls[0].arguments[0];
       assert.deepStrictEqual(callArgs, { where, skip, take, orderBy });

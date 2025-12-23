@@ -4,7 +4,7 @@ import TaxProfileController from './tax-profile-controller.js';
 import TaxProfileService from '../services/tax-profile-service.js';
 
 mock.method(TaxProfileService, 'createTaxProfile');
-mock.method(TaxProfileService, 'findManyTaxProfiles');
+mock.method(TaxProfileService, 'findTaxProfiles');
 mock.method(TaxProfileService, 'findTaxProfile');
 mock.method(TaxProfileService, 'updateTaxProfile');
 mock.method(TaxProfileService, 'deleteTaxProfile');
@@ -16,7 +16,7 @@ describe('TaxProfileController', () => {
 
   beforeEach(() => {
     (TaxProfileService.createTaxProfile as any).mock.resetCalls();
-    (TaxProfileService.findManyTaxProfiles as any).mock.resetCalls();
+    (TaxProfileService.findTaxProfiles as any).mock.resetCalls();
     (TaxProfileService.findTaxProfile as any).mock.resetCalls();
     (TaxProfileService.updateTaxProfile as any).mock.resetCalls();
     (TaxProfileService.deleteTaxProfile as any).mock.resetCalls();
@@ -69,13 +69,13 @@ describe('TaxProfileController', () => {
         { id: '1', legalName: 'Test', vatNumber: '123456789', address: '123 Test St', city: 'Test City', zipCode: '12345', country: 'Test Country', createdAt: new Date(), updatedAt: new Date(), userId: 'user123' },
         { id: '2', legalName: 'Test', vatNumber: '123456789', address: '123 Test St', city: 'Test City', zipCode: '12345', country: 'Test Country', createdAt: new Date(), updatedAt: new Date(), userId: 'user123' },
       ];
-      (TaxProfileService.findManyTaxProfiles as any).mock.mockImplementationOnce(() => Promise.resolve(taxProfiles));
+      (TaxProfileService.findTaxProfiles as any).mock.mockImplementationOnce(() => Promise.resolve(taxProfiles));
 
       await TaxProfileController.getTaxProfiles(req, res, next);
 
       assert.strictEqual(res.statusCode, 200);
       assert.deepStrictEqual(res.jsonData, { taxProfiles });
-      assert.strictEqual((TaxProfileService.findManyTaxProfiles as any).mock.callCount(), 1);
+      assert.strictEqual((TaxProfileService.findTaxProfiles as any).mock.callCount(), 1);
     });
   });
 

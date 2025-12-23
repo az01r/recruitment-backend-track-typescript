@@ -13,7 +13,7 @@ class TaxProfileService {
     return await this.prismaClient.taxProfile.create({ data });
   }
 
-  findManyTaxProfiles = async (where: Prisma.TaxProfileWhereInput, skip?: number, take?: number) => {
+  findTaxProfiles = async (where: Prisma.TaxProfileWhereInput, skip?: number, take?: number) => {
     return await this.prismaClient.taxProfile.findMany({
       skip: skip || 0,
       take: take || 10,
