@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import "dotenv/config";
 import UserService from "../services/user-service.js";
 import jwt from "jsonwebtoken";
+import { Prisma } from "../generated/prisma/client.js";
 
 class UserController {
   private jwtSign = (userId: string) => {
@@ -13,8 +14,9 @@ class UserController {
 
   signup = async (req: Request, res: Response, _next: NextFunction) => {
     const { email, password } = req.body;
+    const where: Prisma.UserWhereUniqueInput = { email };
     const hashedPassword = await bcrypt.hash(password, 12);
-    const existingUser = await UserService.findUserByEmail(email);
+    const existingUser = await UserService.findUser(where);
     if (existingUser) {
       res.status(409);
       throw new Error("User already registered.");
@@ -26,7 +28,8 @@ class UserController {
 
   login = async (req: Request, res: Response, _next: NextFunction) => {
     const { email, password } = req.body;
-    const user = await UserService.findUserByEmail(email);
+    const where: Prisma.UserWhereUniqueInput = { email };
+    const user = await UserService.findUser(where);
     if (!user) {
       res.status(404);
       throw new Error("E-Mail not registered yet.");
@@ -41,7 +44,8 @@ class UserController {
   }
 
   getUser = async (req: Request, res: Response, _next: NextFunction) => {
-    const user = await UserService.findUserById(req.userId!);
+    const where: Prisma.UserWhereUniqueInput = { id: req.userId! };
+    const user = await UserService.findUser(where);
     if (!user) {
       res.status(404);
       throw new Error("User not found.");
@@ -51,13 +55,9 @@ class UserController {
 
   updateUser = async (req: Request, res: Response, _next: NextFunction) => {
     const { email, password, firstName, lastName, birthDate } = req.body;
-    const user = await UserService.updateUser(req.userId!, {
-      email,
-      password,
-      firstName,
-      lastName,
-      birthDate: birthDate ? new Date(birthDate) : undefined
-    });
+    const data: Prisma.UserUpdateInput = { email, password, firstName, lastName, birthDate: birthDate ? new Date(birthDate) : undefined };
+    const where: Prisma.UserWhereUniqueInput = { id: req.userId! };
+    const user = await UserService.updateUser(where, data);
     if (!user) {
       res.status(404);
       throw new Error("User not found.");
@@ -66,7 +66,8 @@ class UserController {
   }
 
   deleteUser = async (req: Request, res: Response, _next: NextFunction) => {
-    const user = await UserService.deleteUser(req.userId!);
+    const where: Prisma.UserWhereUniqueInput = { id: req.userId! };
+    const user = await UserService.deleteUser(where);
     if (!user) {
       res.status(404);
       throw new Error("User not found.");

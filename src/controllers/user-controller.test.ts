@@ -5,8 +5,7 @@ import UserService from '../services/user-service.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-mock.method(UserService, 'findUserByEmail');
-mock.method(UserService, 'findUserById');
+mock.method(UserService, 'findUser');
 mock.method(UserService, 'createUser');
 mock.method(UserService, 'updateUser');
 mock.method(UserService, 'deleteUser');
@@ -19,8 +18,7 @@ describe('UserController', () => {
   let next: any;
 
   beforeEach(() => {
-    (UserService.findUserByEmail as any).mock.resetCalls();
-    (UserService.findUserById as any).mock.resetCalls();
+    (UserService.findUser as any).mock.resetCalls();
     (UserService.createUser as any).mock.resetCalls();
     (UserService.updateUser as any).mock.resetCalls();
     (UserService.deleteUser as any).mock.resetCalls();
@@ -55,21 +53,22 @@ describe('UserController', () => {
       req.body = { email: 'test@test.com', password: 'testtest' };
       const mockUser = { id: '1', email: 'test@test.com' };
 
-      (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve(null));
+      (UserService.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
       (UserService.createUser as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
 
       await UserController.signup(req, res, next);
 
       assert.strictEqual(res.statusCode, 201);
       assert.deepStrictEqual(res.jsonData, { message: "Signed up.", jwt: 'mock_token' });
-      assert.strictEqual((UserService.findUserByEmail as any).mock.callCount(), 1);
+      assert.strictEqual((UserService.findUser as any).mock.callCount(), 1);
       assert.strictEqual((UserService.createUser as any).mock.callCount(), 1);
     });
 
     it('should fallback to 409 if user already exists', async () => {
       req.body = { email: 'existinguser@test.com', password: 'testtest' };
       const mockUser = { id: '1', email: 'test@test.com' };
-      (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
+
+      (UserService.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
 
       await assert.rejects(
         async () => {
@@ -83,7 +82,7 @@ describe('UserController', () => {
         }
       );
       assert.strictEqual((UserService.createUser as any).mock.callCount(), 0);
-      assert.strictEqual((UserService.findUserByEmail as any).mock.callCount(), 1);
+      assert.strictEqual((UserService.findUser as any).mock.callCount(), 1);
     });
   });
 
@@ -92,14 +91,14 @@ describe('UserController', () => {
       req.body = { email: 'test@test.com', password: 'testtest' };
       const mockUser = { id: '1', email: 'test@test.com' };
 
-      (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
+      (UserService.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
       (bcrypt.compare as any).mock.mockImplementationOnce(() => Promise.resolve(true));
 
       await UserController.login(req, res, next);
 
       assert.strictEqual(res.statusCode, 200);
       assert.deepStrictEqual(res.jsonData, { message: "Logged in.", jwt: 'mock_token' });
-      assert.strictEqual((UserService.findUserByEmail as any).mock.callCount(), 1);
+      assert.strictEqual((UserService.findUser as any).mock.callCount(), 1);
       assert.strictEqual((bcrypt.compare as any).mock.callCount(), 1);
       assert.strictEqual((jwt.sign as any).mock.callCount(), 1);
     });
@@ -107,7 +106,7 @@ describe('UserController', () => {
     it('should fail if user not found', async () => {
       req.body = { email: 'email@notfound.com', password: 'testtest' };
 
-      (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve(null));
+      (UserService.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await assert.rejects(
         async () => {
@@ -120,7 +119,7 @@ describe('UserController', () => {
           return true;
         }
       );
-      assert.strictEqual((UserService.findUserByEmail as any).mock.callCount(), 1);
+      assert.strictEqual((UserService.findUser as any).mock.callCount(), 1);
       assert.strictEqual((bcrypt.compare as any).mock.callCount(), 0);
       assert.strictEqual((jwt.sign as any).mock.callCount(), 0);
     });
@@ -129,7 +128,7 @@ describe('UserController', () => {
       req.body = { email: 'test@test.com', password: 'wrongpassword' };
       const mockUser = { id: '1', email: 'test@test.com', password: 'hashed_password' };
 
-      (UserService.findUserByEmail as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
+      (UserService.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
       (bcrypt.compare as any).mock.mockImplementationOnce(() => Promise.resolve(false));
 
       await assert.rejects(
@@ -143,7 +142,7 @@ describe('UserController', () => {
           return true;
         }
       );
-      assert.strictEqual((UserService.findUserByEmail as any).mock.callCount(), 1);
+      assert.strictEqual((UserService.findUser as any).mock.callCount(), 1);
       assert.strictEqual((bcrypt.compare as any).mock.callCount(), 1);
       assert.strictEqual((jwt.sign as any).mock.callCount(), 0);
     });
@@ -151,19 +150,21 @@ describe('UserController', () => {
 
   describe('getUser', () => {
     it('should get user profile', async () => {
+      req.userId = 'user123';
       const mockUser = { id: 'user123', email: 'test@test.com' };
 
-      (UserService.findUserById as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
+      (UserService.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(mockUser));
 
       await UserController.getUser(req, res, next);
 
       assert.strictEqual(res.statusCode, 200);
       assert.deepStrictEqual(res.jsonData, mockUser);
-      assert.strictEqual((UserService.findUserById as any).mock.callCount(), 1);
+      assert.strictEqual((UserService.findUser as any).mock.callCount(), 1);
     });
 
     it('should fallback to 404 if user not found', async () => {
-      (UserService.findUserById as any).mock.mockImplementationOnce(() => Promise.resolve(null));
+      req.userId = 'notFound';
+      (UserService.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await assert.rejects(
         async () => {
@@ -176,7 +177,7 @@ describe('UserController', () => {
           return true;
         }
       );
-      assert.strictEqual((UserService.findUserById as any).mock.callCount(), 1);
+      assert.strictEqual((UserService.findUser as any).mock.callCount(), 1);
     });
   });
 
