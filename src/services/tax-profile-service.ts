@@ -24,7 +24,7 @@ class TaxProfileService {
     });
   }
 
-  findUniqueTaxProfile = async (where: Prisma.TaxProfileWhereUniqueInput) => {
+  findTaxProfile = async (where: Prisma.TaxProfileWhereUniqueInput) => {
     return await this.prismaClient.taxProfile.findUnique({ where });
   }
 
@@ -40,7 +40,7 @@ class TaxProfileService {
   }
 
   private validateTaxProfileOwnership = async (where: Prisma.TaxProfileWhereUniqueInput) => {
-    const taxProfile = await this.findUniqueTaxProfile(where);
+    const taxProfile = await this.findTaxProfile(where);
     if (!taxProfile) {
       throw new ReqValidationError({ message: "Tax Profile not found or does not belong to user.", statusCode: 404 });
     }

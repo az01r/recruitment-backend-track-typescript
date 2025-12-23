@@ -29,7 +29,7 @@ class TaxProfileController {
 
   getTaxProfile = async (req: Request, res: Response, _next: NextFunction) => {
     const where: Prisma.TaxProfileWhereUniqueInput = { id: req.params.id, userId: req.userId! };
-    const taxProfile = await TaxProfileService.findUniqueTaxProfile(where);
+    const taxProfile = await TaxProfileService.findTaxProfile(where);
     if (!taxProfile) {
       res.status(404);
       throw new Error('Tax profile not found.');
