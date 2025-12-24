@@ -1,0 +1,5 @@
+services:
+  recruitment-backend:
+    volumes:
+      - .:/app
+      - /app/node_modules

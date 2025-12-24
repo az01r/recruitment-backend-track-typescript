@@ -27,9 +27,6 @@ services:
       - .env
     ports:
       - "${BACKEND_PORT:-3000}:${BACKEND_PORT:-3000}"
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       recruitment-db:
         condition: service_healthy

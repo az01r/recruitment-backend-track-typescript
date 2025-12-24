@@ -116,7 +116,9 @@ docker compose up --build
 docker-compose exec recruitment-backend npx prisma migrate dev
 ```
 
-The first command will build the backend image and start both the db and the backend containers.
+The first command will build the backend image and start both the db and the backend containers. 
+
+Note that in this mode it will also read the docker-compose.override.yml file to create a bind mount for the hot reload of the code.
 
 The second command will run the database migrations. Note that it needs to be executed only the first time the project is run or whenever the database schema changes.
 
@@ -126,8 +128,14 @@ To stop the project you can run:
 docker compose down
 ```
 
-If NODE_ENV env variable is setted to `production`, the project will transpile the TypeScript code when creating backend image and will instal only production dependencies.
-Note that there still is a bind mount in the backend volumes that binds to the local code directory.
+You can also run the project in production mode by setting the NODE_ENV env variable to `production`. 
+You also need to exclude the docker-compose.override.yml file to run this mode correctly. To do so you can run the following command:
+
+```bash
+docker compose -f docker-compose.yml up -d --build
+```
+
+In production mode the project will transpile the TypeScript code when creating backend image and will install only production dependencies.
 
 ## OpenAPI & SwaggerUI
 
