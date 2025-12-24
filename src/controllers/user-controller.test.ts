@@ -66,7 +66,7 @@ describe('UserController', () => {
       assert.strictEqual((UserService.createUser as any).mock.callCount(), 1);
     });
 
-    it('should fallback to 409 if user already exists', async () => {
+    it('should throw error 409 if user already exists', async () => {
       req.body = { email: 'existinguser@test.com', password: 'testtest' };
       const mockUser = { id: '1', email: 'test@test.com' };
 
@@ -105,7 +105,7 @@ describe('UserController', () => {
       assert.strictEqual((jwt.sign as any).mock.callCount(), 1);
     });
 
-    it('should fail if user not found', async () => {
+    it('should throw error 404 if user was not found', async () => {
       req.body = { email: 'email@notfound.com', password: 'testtest' };
 
       (UserService.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -126,7 +126,7 @@ describe('UserController', () => {
       assert.strictEqual((jwt.sign as any).mock.callCount(), 0);
     });
 
-    it('should fail if password incorrect', async () => {
+    it('should throw error 401 if password is incorrect', async () => {
       req.body = { email: 'test@test.com', password: 'wrongpassword' };
       const mockUser = { id: '1', email: 'test@test.com', password: 'hashed_password' };
 
@@ -164,7 +164,7 @@ describe('UserController', () => {
       assert.strictEqual((UserService.findUser as any).mock.callCount(), 1);
     });
 
-    it('should fallback to 404 if user not found', async () => {
+    it('should throw error 404 if user was not found', async () => {
       req.userId = 'notFound';
       (UserService.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
@@ -197,7 +197,7 @@ describe('UserController', () => {
       assert.strictEqual((UserService.updateUser as any).mock.callCount(), 1);
     });
 
-    it('should fallback to 404 if user not found', async () => {
+    it('should throw error 404 if user was not found', async () => {
       req.body = { firstName: 'Updated' };
 
       (UserService.updateUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -230,7 +230,7 @@ describe('UserController', () => {
       assert.strictEqual((UserService.deleteUser as any).mock.callCount(), 1);
     });
 
-    it('should fallback to 404 if user not found', async () => {
+    it('should return 404 if user was not found', async () => {
       (UserService.deleteUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await assert.rejects(

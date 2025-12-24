@@ -58,7 +58,7 @@ describe('InvoiceService', () => {
       assert.strictEqual(prismaMock.invoice.create.mock.callCount(), 1);
     });
 
-    it('should throw error if tax profile does not belong to user', async () => {
+    it('should throw error 404 if tax profile does not exist or does not belong to user', async () => {
       const data: Prisma.InvoiceCreateInput = {
         taxProfile: {
           connect: {
@@ -140,6 +140,28 @@ describe('InvoiceService', () => {
       assert.deepStrictEqual(result, invoices);
       assert.strictEqual(prismaMock.invoice.findMany.mock.callCount(), 1);
     });
+
+    it('should return empty array if no invoices are found', async () => {
+      const where: Prisma.InvoiceWhereInput = { taxProfile: { id: 'taxProfile123', userId: 'user123' } };
+      const skip = 0;
+      const take = 10;
+
+      prismaMock.invoice.findMany.mock.mockImplementationOnce(() => Promise.resolve([]));
+
+      const result = await invoiceService.findInvoices(where, skip, take);
+
+      const callArgs = prismaMock.invoice.findMany.mock.calls[0].arguments[0];
+      assert.deepStrictEqual(callArgs, {
+        skip,
+        take,
+        where,
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+      assert.deepStrictEqual(result, []);
+      assert.strictEqual(prismaMock.invoice.findMany.mock.callCount(), 1);
+    });
   });
 
   describe('findInvoice', () => {
@@ -167,6 +189,32 @@ describe('InvoiceService', () => {
         }
       });
       assert.deepStrictEqual(result, invoice);
+      assert.strictEqual(prismaMock.invoice.findUnique.mock.callCount(), 1);
+    });
+
+    it('should return null if no invoice is found', async () => {
+      const userId = 'user123';
+      const invoiceId = 'invoice123';
+
+      prismaMock.invoice.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
+
+      const result = await invoiceService.findInvoice({
+        id: invoiceId,
+        taxProfile: {
+          userId
+        }
+      });
+
+      const callArgs = prismaMock.invoice.findUnique.mock.calls[0].arguments[0];
+      assert.deepStrictEqual(callArgs, {
+        where: {
+          id: invoiceId,
+          taxProfile: {
+            userId
+          }
+        }
+      });
+      assert.deepStrictEqual(result, null);
       assert.strictEqual(prismaMock.invoice.findUnique.mock.callCount(), 1);
     });
   });

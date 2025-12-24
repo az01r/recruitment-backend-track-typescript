@@ -59,6 +59,22 @@ describe('TaxProfileService', () => {
       assert.deepStrictEqual(result, taxProfiles);
       assert.strictEqual(prismaMock.taxProfile.findMany.mock.callCount(), 1);
     });
+
+    it('should return empty array if no tax profile was found', async () => {
+      const skip = 0;
+      const take = 10;
+      const orderBy = { createdAt: 'desc' };
+      const where: Prisma.TaxProfileWhereInput = { userId: '1' };
+
+      prismaMock.taxProfile.findMany.mock.mockImplementationOnce(() => Promise.resolve([]));
+
+      const result = await taxProfileService.findTaxProfiles(where, skip, take);
+
+      const callArgs = prismaMock.taxProfile.findMany.mock.calls[0].arguments[0];
+      assert.deepStrictEqual(callArgs, { where, skip, take, orderBy });
+      assert.deepStrictEqual(result, []);
+      assert.strictEqual(prismaMock.taxProfile.findMany.mock.callCount(), 1);
+    });
   });
 
   describe('findTaxProfile', () => {
@@ -73,6 +89,19 @@ describe('TaxProfileService', () => {
       const callArgs = prismaMock.taxProfile.findUnique.mock.calls[0].arguments[0];
       assert.deepStrictEqual(callArgs, { where });
       assert.deepStrictEqual(result, taxProfile);
+      assert.strictEqual(prismaMock.taxProfile.findUnique.mock.callCount(), 1);
+    });
+
+    it('should return null if no tax profile was found', async () => {
+      const where: Prisma.TaxProfileWhereUniqueInput = { id: '1', userId: '1' };
+
+      prismaMock.taxProfile.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
+
+      const result = await taxProfileService.findTaxProfile(where);
+
+      const callArgs = prismaMock.taxProfile.findUnique.mock.calls[0].arguments[0];
+      assert.deepStrictEqual(callArgs, { where });
+      assert.deepStrictEqual(result, null);
       assert.strictEqual(prismaMock.taxProfile.findUnique.mock.callCount(), 1);
     });
   });
@@ -94,7 +123,7 @@ describe('TaxProfileService', () => {
       assert.strictEqual(prismaMock.taxProfile.update.mock.callCount(), 1);
     });
 
-    it('should throw error if tax profile was not found or does not belong to user', async () => {
+    it('should throw error 404 if tax profile was not found or does not belong to user', async () => {
       const where: Prisma.TaxProfileWhereUniqueInput = { id: 'notFound', userId: '1' };
       const data: Prisma.TaxProfileUpdateWithoutUserInput = { legalName: 'Updated Legal Name' };
 
@@ -132,7 +161,7 @@ describe('TaxProfileService', () => {
       assert.strictEqual(prismaMock.taxProfile.delete.mock.callCount(), 1);
     });
 
-    it('should throw error if tax profile was not found or does not belong to user', async () => {
+    it('should throw error 404 if tax profile was not found or does not belong to user', async () => {
       const where: Prisma.TaxProfileWhereUniqueInput = { id: 'notFound', userId: '1' };
 
       prismaMock.taxProfile.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));

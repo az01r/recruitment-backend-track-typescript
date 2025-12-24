@@ -108,7 +108,7 @@ describe('TaxProfileController', () => {
       assert.strictEqual((TaxProfileService.findTaxProfile as any).mock.callCount(), 1);
     });
 
-    it('should throw error if Tax Profile not found or does not belong to user.', async () => {
+    it('should throw error 404 if tax profile was not found or does not belong to user', async () => {
       req.userId = 'user123';
       req.params = { id: 'notFound' };
       (TaxProfileService.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(null));
