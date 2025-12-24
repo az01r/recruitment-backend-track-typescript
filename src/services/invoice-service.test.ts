@@ -4,6 +4,7 @@ import { InvoiceService } from "./invoice-service.js";
 import { Prisma, InvoiceStatus, Currency } from '../generated/prisma/client.js';
 import ReqValidationError from "../types/request-validation-error.js";
 import { TaxProfileService } from "./tax-profile-service.js";
+import { INVOICE_NOT_FOUND, TAX_PROFILE_NOT_FOUND } from '../utils/constants.js';
 
 describe('InvoiceService', () => {
   let invoiceService: InvoiceService;
@@ -78,7 +79,7 @@ describe('InvoiceService', () => {
         },
         (error: any) => {
           assert(error instanceof ReqValidationError);
-          assert.strictEqual(error.message, "Tax Profile not found or does not belong to user.");
+          assert.strictEqual(error.message, TAX_PROFILE_NOT_FOUND);
           assert.strictEqual(error.statusCode, 404);
           return true;
         }
@@ -200,7 +201,7 @@ describe('InvoiceService', () => {
         },
         (error: any) => {
           assert(error instanceof ReqValidationError);
-          assert.strictEqual(error.message, "Invoice not found or does not belong to user.");
+          assert.strictEqual(error.message, INVOICE_NOT_FOUND);
           assert.strictEqual(error.statusCode, 404);
           return true;
         }
@@ -238,7 +239,7 @@ describe('InvoiceService', () => {
         },
         (error: any) => {
           assert(error instanceof ReqValidationError);
-          assert.strictEqual(error.message, "Invoice not found or does not belong to user.");
+          assert.strictEqual(error.message, INVOICE_NOT_FOUND);
           assert.strictEqual(error.statusCode, 404);
           return true;
         }

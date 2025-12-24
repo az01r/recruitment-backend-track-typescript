@@ -1,9 +1,10 @@
 import { body } from 'express-validator';
+import { INVALID_EMAIL } from '../constants.js';
 
 export const signupValidation = [
   body('email')
     .isEmail()
-    .withMessage('Please enter a valid email.'),
+    .withMessage(INVALID_EMAIL),
   body('password')
     .trim()
     .isLength({ min: 8 })
@@ -13,14 +14,14 @@ export const signupValidation = [
 export const loginValidation = [
   body('email')
     .isEmail()
-    .withMessage('Please enter a valid email.'),
+    .withMessage(INVALID_EMAIL),
 ];
 
 export const updateValidation = [
   body('email')
     .optional()
     .isEmail()
-    .withMessage('Please enter a valid email.'),
+    .withMessage(INVALID_EMAIL),
   body('password')
     .optional()
     .trim()

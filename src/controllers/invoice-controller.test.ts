@@ -2,6 +2,7 @@ import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import InvoiceController from './invoice-controller.js';
 import InvoiceService from '../services/invoice-service.js';
+import { INVOICE_DELETED, INVOICE_NOT_FOUND } from '../utils/constants.js';
 
 mock.method(InvoiceService, 'createInvoice');
 mock.method(InvoiceService, 'findInvoices');
@@ -142,7 +143,7 @@ describe('InvoiceController', () => {
         },
         (error: any) => {
           assert(error instanceof Error);
-          assert.strictEqual(error.message, "Invoice not found.");
+          assert.strictEqual(error.message, INVOICE_NOT_FOUND);
           assert.strictEqual(res.statusCode, 404);
           return true;
         }
@@ -181,7 +182,7 @@ describe('InvoiceController', () => {
       await InvoiceController.deleteInvoice(req, res, next);
 
       assert.strictEqual(res.statusCode, 200);
-      assert.deepStrictEqual(res.jsonData, { message: 'Invoice deleted.' });
+      assert.deepStrictEqual(res.jsonData, { message: INVOICE_DELETED });
       assert.strictEqual((InvoiceService.deleteInvoice as any).mock.callCount(), 1);
     });
   });

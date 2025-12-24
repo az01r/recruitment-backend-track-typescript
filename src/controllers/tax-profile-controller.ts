@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { Prisma } from "../generated/prisma/client.js";
 import TaxProfileService from "../services/tax-profile-service.js";
+import { TAX_PROFILE_DELETED, TAX_PROFILE_NOT_FOUND } from "../utils/constants.js";
 
 class TaxProfileController {
 
@@ -32,7 +33,7 @@ class TaxProfileController {
     const taxProfile = await TaxProfileService.findTaxProfile(where);
     if (!taxProfile) {
       res.status(404);
-      throw new Error('Tax profile not found.');
+      throw new Error(TAX_PROFILE_NOT_FOUND);
     }
     res.status(200).json({ taxProfile });
   }
@@ -48,7 +49,7 @@ class TaxProfileController {
   deleteTaxProfile = async (req: Request, res: Response, _next: NextFunction) => {
     const where: Prisma.TaxProfileWhereUniqueInput = { id: req.params.id, userId: req.userId! };
     await TaxProfileService.deleteTaxProfile(where);
-    res.status(200).json({ message: 'Tax profile deleted.' });
+    res.status(200).json({ message: TAX_PROFILE_DELETED });
   }
 }
 

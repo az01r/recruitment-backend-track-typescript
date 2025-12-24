@@ -2,6 +2,7 @@ import prismaClientSingleton from "../utils/prisma.js";
 import { Prisma, PrismaClient } from "../generated/prisma/client.js";
 import ReqValidationError from "../types/request-validation-error.js";
 import TaxProfileService, { TaxProfileService as TaxProfileServiceClass } from "./tax-profile-service.js";
+import { INVOICE_NOT_FOUND, TAX_PROFILE_NOT_FOUND } from "../utils/constants.js";
 
 class InvoiceService {
   private prismaClient: PrismaClient;
@@ -14,7 +15,7 @@ class InvoiceService {
 
   createInvoice = async (data: Prisma.InvoiceCreateInput) => {
     if (!data.taxProfile.connect) {
-      throw new ReqValidationError({ message: "Tax Profile not found or does not belong to user.", statusCode: 404 });
+      throw new ReqValidationError({ message: TAX_PROFILE_NOT_FOUND, statusCode: 404 });
     }
     await this.validateTaxProfileOwnership(data.taxProfile.connect);
     return await this.prismaClient.invoice.create({ data });
@@ -49,7 +50,7 @@ class InvoiceService {
     const invoice = await this.prismaClient.invoice.findUnique({ where });
 
     if (!invoice) {
-      throw new ReqValidationError({ message: "Invoice not found or does not belong to user.", statusCode: 404 });
+      throw new ReqValidationError({ message: INVOICE_NOT_FOUND, statusCode: 404 });
     }
   }
 
@@ -57,7 +58,7 @@ class InvoiceService {
     const taxProfile = await this.taxProfileService.findTaxProfile(where);
 
     if (!taxProfile) {
-      throw new ReqValidationError({ message: "Tax Profile not found or does not belong to user.", statusCode: 404 });
+      throw new ReqValidationError({ message: TAX_PROFILE_NOT_FOUND, statusCode: 404 });
     }
   }
 }

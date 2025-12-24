@@ -104,6 +104,8 @@ const router = Router();
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Invoice'
+ *       401:
+ *         description: Unauthorized
  */
 router.get('/', isAuth, InvoiceController.getInvoices);
 
@@ -132,8 +134,10 @@ router.get('/', isAuth, InvoiceController.getInvoices);
  *               properties:
  *                 invoice:
  *                   $ref: '#/components/schemas/Invoice'
+ *       401:
+ *         description: Unauthorized
  *       404:
- *         description: The invoice was not found
+ *         description: Invoice does not exist or does not belong to user
  */
 router.get('/:id', isAuth, InvoiceController.getInvoice);
 
@@ -187,8 +191,10 @@ router.get('/:id', isAuth, InvoiceController.getInvoice);
  *               properties:
  *                 invoice:
  *                   $ref: '#/components/schemas/Invoice'
+ *       401:
+ *         description: Unauthorized
  *       404:
- *         description: Tax Profile not found or does not belong to user
+ *         description: Tax profile does not exist or does not belong to user
  *       422:
  *         description: Validation error
  */
@@ -244,8 +250,10 @@ router.post('/', isAuth, saveInvoiceValidation, validateRequest, InvoiceControll
  *               properties:
  *                 invoice:
  *                   $ref: '#/components/schemas/Invoice'
+ *       401:
+ *         description: Unauthorized
  *       404:
- *         description: Invoice not found or does not belong to user.
+ *         description: Invoice does not exist or does not belong to user.
  *       422:
  *         description: Validation error
  */
@@ -277,8 +285,10 @@ router.put('/:id', isAuth, updateInvoiceValidation, validateRequest, InvoiceCont
  *                 message:
  *                   type: string
  *                   example: Invoice deleted.
+ *       401:
+ *         description: Unauthorized
  *       404:
- *         description: Invoice not found or does not belong to user.
+ *         description: Invoice does not exist or does not belong to user.
  */
 router.delete('/:id', isAuth, InvoiceController.deleteInvoice);
 

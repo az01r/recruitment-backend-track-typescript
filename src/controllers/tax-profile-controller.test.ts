@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import TaxProfileController from './tax-profile-controller.js';
 import TaxProfileService from '../services/tax-profile-service.js';
 import { Prisma } from '../generated/prisma/client.js';
+import { TAX_PROFILE_DELETED, TAX_PROFILE_NOT_FOUND } from '../utils/constants.js';
 
 mock.method(TaxProfileService, 'createTaxProfile');
 mock.method(TaxProfileService, 'findTaxProfiles');
@@ -107,7 +108,7 @@ describe('TaxProfileController', () => {
       assert.strictEqual((TaxProfileService.findTaxProfile as any).mock.callCount(), 1);
     });
 
-    it('should throw error if tax profile not found', async () => {
+    it('should throw error if Tax Profile not found or does not belong to user.', async () => {
       req.userId = 'user123';
       req.params = { id: 'notFound' };
       (TaxProfileService.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -118,7 +119,7 @@ describe('TaxProfileController', () => {
         },
         (error: any) => {
           assert(error instanceof Error);
-          assert.strictEqual(error.message, "Tax profile not found.");
+          assert.strictEqual(error.message, TAX_PROFILE_NOT_FOUND);
           assert.strictEqual(res.statusCode, 404);
           return true;
         }
@@ -155,7 +156,7 @@ describe('TaxProfileController', () => {
       await TaxProfileController.deleteTaxProfile(req, res, next);
 
       assert.strictEqual(res.statusCode, 200);
-      assert.deepStrictEqual(res.jsonData, { message: 'Tax profile deleted.' });
+      assert.deepStrictEqual(res.jsonData, { message: TAX_PROFILE_DELETED });
       assert.strictEqual((TaxProfileService.deleteTaxProfile as any).mock.callCount(), 1);
     });
   });

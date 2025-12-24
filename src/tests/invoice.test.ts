@@ -4,6 +4,7 @@ import request from 'supertest';
 import app from '../index.js';
 import prisma from '../utils/prisma.js';
 import { Prisma } from '../generated/prisma/client.js';
+import { INVOICE_DELETED, INVOICE_NOT_FOUND, TAX_PROFILE_NOT_FOUND, UNAUTHORIZED, VALIDATION_ERROR } from '../utils/constants.js';
 
 describe('Integration Tests: Invoice', () => {
   const testUser = {
@@ -18,7 +19,7 @@ describe('Integration Tests: Invoice', () => {
     legalName: `Legal Name`,
     vatNumber: 'IT12345678901',
     address: 'Via Roma 1',
-    city: 'Rome',
+    city: 'Turin',
     zipCode: '100',
     country: 'Italy'
   };
@@ -95,6 +96,21 @@ describe('Integration Tests: Invoice', () => {
     invoiceId = response.body.invoice.id;
   });
 
+  it('POST /invoice should return 401 with invalid token', async () => {
+    const response = await request(app)
+      .post('/invoice')
+      .set('Authorization', `Bearer invalid-token`)
+      .send()
+      .expect(401);
+    assert.strictEqual(response.body.message, UNAUTHORIZED);
+    const response2 = await request(app)
+      .post('/invoice')
+      .set('Authorization', `Bearer invalid-token`)
+      .send()
+      .expect(401);
+    assert.strictEqual(response2.body.message, UNAUTHORIZED);
+  });
+
   it('POST /invoice should return 404 not found if tax profile does not exist or does not belong to user', async () => {
     const invoiceData = {
       ...testInvoice,
@@ -106,7 +122,25 @@ describe('Integration Tests: Invoice', () => {
       .send(invoiceData)
       .expect(404);
 
-    assert.strictEqual(response.body.message, 'Tax Profile not found or does not belong to user.');
+    assert.strictEqual(response.body.message, TAX_PROFILE_NOT_FOUND);
+  });
+
+  it('POST /invoice should return 422 for invalid inputs', async () => {
+    const response = await request(app)
+      .post('/invoice')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        taxProfileId,
+        amount: 'invalid',
+        status: 'invalid',
+        currency: 'invalid'
+      })
+      .expect(422);
+    assert.strictEqual(response.body.message, VALIDATION_ERROR);
+    assert.strictEqual(response.body.errors.length, 3);
+    assert.strictEqual(response.body.errors[0].msg, 'Amount must be a positive number.');
+    assert.strictEqual(response.body.errors[1].msg, 'Status must be one of PENDING, PAID, CANCELLED.');
+    assert.strictEqual(response.body.errors[2].msg, 'Currency must be one of EUR, USD, GBP.');
   });
 
   it('GET /invoice should return all user invoices', async () => {
@@ -117,6 +151,18 @@ describe('Integration Tests: Invoice', () => {
 
     assert.ok(response.body.invoices);
     assert.strictEqual(response.body.invoices.length, 1);
+  });
+
+  it('GET /invoice should return 401', async () => {
+    const response = await request(app)
+      .get('/invoice')
+      .expect(401);
+    assert.strictEqual(response.body.message, UNAUTHORIZED);
+    const response2 = await request(app)
+      .get('/invoice')
+      .set('Authorization', `Bearer invalid-token`)
+      .expect(401);
+    assert.strictEqual(response2.body.message, UNAUTHORIZED);
   });
 
   it('GET /invoice/:id should return a single invoice', async () => {
@@ -132,13 +178,25 @@ describe('Integration Tests: Invoice', () => {
     assert.strictEqual(response.body.invoice.currency, testInvoice.currency);
   });
 
+  it('GET /invoice/:id should return 401 with invalid token', async () => {
+    const response = await request(app)
+      .get(`/invoice/${invoiceId}`)
+      .expect(401);
+    assert.strictEqual(response.body.message, UNAUTHORIZED);
+    const response2 = await request(app)
+      .get(`/invoice/${invoiceId}`)
+      .set('Authorization', `Bearer invalid-token`)
+      .expect(401);
+    assert.strictEqual(response2.body.message, UNAUTHORIZED);
+  });
+
   it('GET /invoice/:id should return 404 not found if invoice does not exist or does not belong to user', async () => {
     const response = await request(app)
       .get('/invoice/not-found')
       .set('Authorization', `Bearer ${authToken}`)
       .expect(404);
 
-    assert.strictEqual(response.body.message, 'Invoice not found.');
+    assert.strictEqual(response.body.message, INVOICE_NOT_FOUND);
   });
 
   it('PUT /invoice/:id should update a single invoice', async () => {
@@ -159,6 +217,21 @@ describe('Integration Tests: Invoice', () => {
     assert.strictEqual(response.body.invoice.currency, 'EUR');
   });
 
+  it('PUT /invoice/:id should return 401 with invalid token', async () => {
+    const response = await request(app)
+      .put(`/invoice/${invoiceId}`)
+      .set('Authorization', `Bearer invalid-token`)
+      .send()
+      .expect(401);
+    assert.strictEqual(response.body.message, UNAUTHORIZED);
+    const response2 = await request(app)
+      .put(`/invoice/${invoiceId}`)
+      .set('Authorization', `Bearer invalid-token`)
+      .send()
+      .expect(401);
+    assert.strictEqual(response2.body.message, UNAUTHORIZED);
+  });
+
   it('PUT /invoice/:id should return 404 not found if invoice does not exist or does not belong to user', async () => {
     const response = await request(app)
       .put('/invoice/not-found')
@@ -170,7 +243,25 @@ describe('Integration Tests: Invoice', () => {
       })
       .expect(404);
 
-    assert.strictEqual(response.body.message, 'Invoice not found or does not belong to user.');
+    assert.strictEqual(response.body.message, INVOICE_NOT_FOUND);
+  });
+
+  it('PUT /invoice/:id should return 422 for invalid inputs', async () => {
+    const response = await request(app)
+      .put(`/invoice/${invoiceId}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        taxProfileId,
+        amount: 'invalid',
+        status: 'invalid',
+        currency: 'invalid'
+      })
+      .expect(422);
+    assert.strictEqual(response.body.message, VALIDATION_ERROR);
+    assert.strictEqual(response.body.errors.length, 3);
+    assert.strictEqual(response.body.errors[0].msg, 'Amount must be a positive number.');
+    assert.strictEqual(response.body.errors[1].msg, 'Status must be one of PENDING, PAID, CANCELLED.');
+    assert.strictEqual(response.body.errors[2].msg, 'Currency must be one of EUR, USD, GBP.');
   });
 
   it('DELETE /invoice/:id should delete a invoice', async () => {
@@ -179,7 +270,19 @@ describe('Integration Tests: Invoice', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200);
 
-    assert.strictEqual(response.body.message, 'Invoice deleted.');
+    assert.strictEqual(response.body.message, INVOICE_DELETED);
+  });
+
+  it('DELETE /invoice/:id should return 401 with invalid token', async () => {
+    const response = await request(app)
+      .delete(`/invoice/${invoiceId}`)
+      .expect(401);
+    assert.strictEqual(response.body.message, UNAUTHORIZED);
+    const response2 = await request(app)
+      .delete(`/invoice/${invoiceId}`)
+      .set('Authorization', `Bearer invalid-token`)
+      .expect(401);
+    assert.strictEqual(response2.body.message, UNAUTHORIZED);
   });
 
   it('DELETE /invoice/:id should return 404 not found if invoice does not exist or does not belong to user', async () => {
@@ -188,6 +291,6 @@ describe('Integration Tests: Invoice', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .expect(404);
 
-    assert.strictEqual(response.body.message, 'Invoice not found or does not belong to user.');
+    assert.strictEqual(response.body.message, INVOICE_NOT_FOUND);
   });
 });

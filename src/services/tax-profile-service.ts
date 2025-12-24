@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from "../generated/prisma/client.js";
 import ReqValidationError from "../types/request-validation-error.js";
+import { TAX_PROFILE_NOT_FOUND } from "../utils/constants.js";
 import prismaClientSingleton from "../utils/prisma.js";
 
 class TaxProfileService {
@@ -42,7 +43,7 @@ class TaxProfileService {
   private validateTaxProfileOwnership = async (where: Prisma.TaxProfileWhereUniqueInput) => {
     const taxProfile = await this.findTaxProfile(where);
     if (!taxProfile) {
-      throw new ReqValidationError({ message: "Tax Profile not found or does not belong to user.", statusCode: 404 });
+      throw new ReqValidationError({ message: TAX_PROFILE_NOT_FOUND, statusCode: 404 });
     }
   }
 }

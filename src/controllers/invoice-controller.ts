@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import InvoiceService from "../services/invoice-service.js";
 import { Currency, InvoiceStatus, Prisma } from "../generated/prisma/client.js";
+import { INVOICE_DELETED, INVOICE_NOT_FOUND } from "../utils/constants.js";
 
 class InvoiceController {
 
@@ -31,7 +32,7 @@ class InvoiceController {
     const invoice = await InvoiceService.findInvoice(where);
     if (!invoice) {
       res.status(404);
-      throw new Error('Invoice not found.');
+      throw new Error(INVOICE_NOT_FOUND);
     }
     res.status(200).json({ invoice });
   }
@@ -47,7 +48,7 @@ class InvoiceController {
   deleteInvoice = async (req: Request, res: Response, _next: NextFunction) => {
     const where: Prisma.InvoiceWhereUniqueInput = { id: req.params.id, taxProfile: { userId: req.userId! } };
     await InvoiceService.deleteInvoice(where);
-    res.status(200).json({ message: 'Invoice deleted.' });
+    res.status(200).json({ message: INVOICE_DELETED });
   }
 }
 

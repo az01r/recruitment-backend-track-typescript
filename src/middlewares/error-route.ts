@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import ReqValidationError from '../types/request-validation-error.js';
 import logger from '../utils/logger.js';
+import { VALIDATION_ERROR } from '../utils/constants.js';
 
 export default (error: Error, req: Request, res: Response, _next: NextFunction) => {
   res.statusCode < 400 && res.status(500);
@@ -16,7 +17,7 @@ export default (error: Error, req: Request, res: Response, _next: NextFunction) 
       validationErrors,
       path: req.path,
       method: req.method
-    }, 'Validation error');
+    }, VALIDATION_ERROR);
   } else {
     logger.error({
       err: error,

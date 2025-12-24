@@ -115,7 +115,7 @@
           "legalName": "Acme Corp",
           "vatNumber": "IT12345678901",
           "address": "Via Roma 1",
-          "city": "Rome",
+          "city": "Turin",
           "zipCode": 100,
           "country": "Italy"
         }
@@ -257,6 +257,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       },
@@ -330,8 +333,11 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
-            "description": "Tax Profile not found or does not belong to user"
+            "description": "Tax profile does not exist or does not belong to user"
           },
           "422": {
             "description": "Validation error"
@@ -377,8 +383,11 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
-            "description": "The invoice was not found"
+            "description": "Invoice does not exist or does not belong to user"
           }
         }
       },
@@ -454,8 +463,11 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
-            "description": "Invoice not found or does not belong to user."
+            "description": "Invoice does not exist or does not belong to user."
           },
           "422": {
             "description": "Validation error"
@@ -500,8 +512,11 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
-            "description": "Invoice not found or does not belong to user."
+            "description": "Invoice does not exist or does not belong to user."
           }
         }
       }
@@ -593,6 +608,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       },
@@ -635,7 +653,7 @@
                   },
                   "city": {
                     "type": "string",
-                    "example": "Torino"
+                    "example": "Turin"
                   },
                   "zipCode": {
                     "type": "string",
@@ -665,6 +683,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "422": {
             "description": "Validation error"
@@ -696,7 +717,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The tax profile description by id",
+            "description": "The tax profile",
             "content": {
               "application/json": {
                 "schema": {
@@ -710,8 +731,11 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
-            "description": "The tax profile was not found"
+            "description": "Tax profile does not exist or does not belong to user"
           }
         }
       },
@@ -757,7 +781,7 @@
                   },
                   "city": {
                     "type": "string",
-                    "example": "Torino"
+                    "example": "Turin"
                   },
                   "zipCode": {
                     "type": "string",
@@ -788,8 +812,11 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
-            "description": "The tax profile was not found"
+            "description": "Tax profile does not exist or does not belong to user"
           },
           "422": {
             "description": "Validation error"
@@ -819,7 +846,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The tax profile was deleted",
+            "description": "Tax profile deleted.",
             "content": {
               "application/json": {
                 "schema": {
@@ -827,15 +854,18 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "Tax profile deleted."
+                      "example": "Tax profile deleted"
                     }
                   }
                 }
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
-            "description": "The tax profile was not found"
+            "description": "Tax profile does not exist or does not belong to user"
           }
         }
       }
@@ -872,7 +902,7 @@
         },
         "responses": {
           "201": {
-            "description": "The user was successfully created",
+            "description": "Signed up.",
             "content": {
               "application/json": {
                 "schema": {
@@ -890,7 +920,7 @@
             }
           },
           "409": {
-            "description": "User already registered"
+            "description": "User already registered."
           },
           "422": {
             "description": "Validation error"
@@ -930,7 +960,7 @@
         },
         "responses": {
           "200": {
-            "description": "The user was successfully logged in",
+            "description": "Logged in.",
             "content": {
               "application/json": {
                 "schema": {
@@ -948,10 +978,10 @@
             }
           },
           "401": {
-            "description": "Invalid credentials"
+            "description": "Unauthorized"
           },
           "404": {
-            "description": "User not found"
+            "description": "E-Mail not registered yet."
           },
           "422": {
             "description": "Validation error"
@@ -961,7 +991,7 @@
     },
     "/user": {
       "get": {
-        "summary": "Get the current user profile",
+        "summary": "Get the logged in user profile",
         "tags": [
           "User"
         ],
@@ -981,13 +1011,16 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "User not found"
           }
         }
       },
       "put": {
-        "summary": "Update the current user profile",
+        "summary": "Update the logged in user profile",
         "tags": [
           "User"
         ],
@@ -1031,7 +1064,7 @@
         },
         "responses": {
           "200": {
-            "description": "The updated user profile",
+            "description": "User updated",
             "content": {
               "application/json": {
                 "schema": {
@@ -1039,6 +1072,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "404": {
             "description": "User not found"
@@ -1049,7 +1085,7 @@
         }
       },
       "delete": {
-        "summary": "Delete the current user profile",
+        "summary": "Delete the logged in user profile",
         "tags": [
           "User"
         ],
@@ -1060,7 +1096,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The user profile was deleted",
+            "description": "User deleted",
             "content": {
               "application/json": {
                 "schema": {
@@ -1068,12 +1104,15 @@
                   "properties": {
                     "message": {
                       "type": "string",
-                      "example": "User deleted."
+                      "example": "User deleted"
                     }
                   }
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "404": {
             "description": "User not found"

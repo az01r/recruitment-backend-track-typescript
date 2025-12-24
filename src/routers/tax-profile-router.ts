@@ -51,7 +51,7 @@ const router = Router();
  *         legalName: Acme Corp
  *         vatNumber: IT12345678901
  *         address: Via Roma 1
- *         city: Rome
+ *         city: Turin
  *         zipCode: 00100
  *         country: Italy
  */
@@ -112,6 +112,8 @@ const router = Router();
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/TaxProfile'
+ *       401:
+ *         description: Unauthorized
  */
 router.get('/', isAuth, TaxProfileController.getTaxProfiles);
 
@@ -132,7 +134,7 @@ router.get('/', isAuth, TaxProfileController.getTaxProfiles);
  *         description: The tax profile id
  *     responses:
  *       200:
- *         description: The tax profile description by id
+ *         description: The tax profile
  *         content:
  *           application/json:
  *             schema:
@@ -140,8 +142,10 @@ router.get('/', isAuth, TaxProfileController.getTaxProfiles);
  *               properties:
  *                 taxProfile:
  *                   $ref: '#/components/schemas/TaxProfile'
+ *       401:
+ *         description: Unauthorized
  *       404:
- *         description: The tax profile was not found
+ *         description: Tax profile does not exist or does not belong to user
  */
 router.get('/:id', isAuth, TaxProfileController.getTaxProfile);
 
@@ -178,7 +182,7 @@ router.get('/:id', isAuth, TaxProfileController.getTaxProfile);
  *                 example: Via Roma 1
  *               city:
  *                 type: string
- *                 example: Torino
+ *                 example: Turin
  *               zipCode:
  *                 type: string
  *                 example: 10123
@@ -195,6 +199,8 @@ router.get('/:id', isAuth, TaxProfileController.getTaxProfile);
  *               properties:
  *                 taxProfile:
  *                   $ref: '#/components/schemas/TaxProfile'
+ *       401:
+ *         description: Unauthorized
  *       422:
  *         description: Validation error
  */
@@ -233,7 +239,7 @@ router.post('/', isAuth, createValidation, validateRequest, TaxProfileController
  *                 example: Via Roma 1
  *               city:
  *                 type: string
- *                 example: Torino
+ *                 example: Turin
  *               zipCode:
  *                 type: string
  *                 example: 10123
@@ -250,8 +256,10 @@ router.post('/', isAuth, createValidation, validateRequest, TaxProfileController
  *               properties:
  *                 taxProfile:
  *                   $ref: '#/components/schemas/TaxProfile'
+ *       401:
+ *         description: Unauthorized
  *       404:
- *         description: The tax profile was not found
+ *         description: Tax profile does not exist or does not belong to user
  *       422:
  *         description: Validation error
  */
@@ -274,7 +282,7 @@ router.put('/:id', isAuth, updateValidation, validateRequest, TaxProfileControll
  *         description: The tax profile id
  *     responses:
  *       200:
- *         description: The tax profile was deleted
+ *         description: Tax profile deleted.
  *         content:
  *           application/json:
  *             schema:
@@ -282,9 +290,11 @@ router.put('/:id', isAuth, updateValidation, validateRequest, TaxProfileControll
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Tax profile deleted.
+ *                   example: Tax profile deleted
+ *       401:
+ *         description: Unauthorized
  *       404:
- *         description: The tax profile was not found
+ *         description: Tax profile does not exist or does not belong to user
  */
 router.delete('/:id', isAuth, TaxProfileController.deleteTaxProfile);
 

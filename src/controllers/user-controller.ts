@@ -4,6 +4,7 @@ import "dotenv/config";
 import UserService from "../services/user-service.js";
 import jwt from "jsonwebtoken";
 import { Prisma } from "../generated/prisma/client.js";
+import { SIGNED_UP, USER_DELETED, USER_NOT_FOUND, WRONG_PASSWORD } from "../utils/constants.js";
 
 class UserController {
   private jwtSign = (userId: string) => {
@@ -23,7 +24,7 @@ class UserController {
     }
     const user = await UserService.createUser({ email, password: hashedPassword });
     const token = this.jwtSign(user.id);
-    res.status(201).json({ message: "Signed up.", jwt: token });
+    res.status(201).json({ message: SIGNED_UP, jwt: token });
   }
 
   login = async (req: Request, res: Response, _next: NextFunction) => {
@@ -37,7 +38,7 @@ class UserController {
     const isEqual = await bcrypt.compare(password, user.password!);
     if (!isEqual) {
       res.status(401);
-      throw new Error("Password is incorrect.");
+      throw new Error(WRONG_PASSWORD);
     }
     const token = this.jwtSign(user.id);
     res.status(200).json({ message: "Logged in.", jwt: token });
@@ -48,7 +49,7 @@ class UserController {
     const user = await UserService.findUser(where);
     if (!user) {
       res.status(404);
-      throw new Error("User not found.");
+      throw new Error(USER_NOT_FOUND);
     }
     res.status(200).json(user);
   }
@@ -60,7 +61,7 @@ class UserController {
     const user = await UserService.updateUser(where, data);
     if (!user) {
       res.status(404);
-      throw new Error("User not found.");
+      throw new Error(USER_NOT_FOUND);
     }
     res.status(200).json(user);
   }
@@ -70,9 +71,9 @@ class UserController {
     const user = await UserService.deleteUser(where);
     if (!user) {
       res.status(404);
-      throw new Error("User not found.");
+      throw new Error(USER_NOT_FOUND);
     }
-    res.status(200).json({ message: 'User deleted.' });
+    res.status(200).json({ message: USER_DELETED });
   }
 }
 

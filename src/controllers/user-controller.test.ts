@@ -4,6 +4,8 @@ import UserController from './user-controller.js';
 import UserService from '../services/user-service.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { SIGNED_UP, USER_DELETED, USER_NOT_FOUND, WRONG_PASSWORD } from '../utils/constants.js';
+
 
 mock.method(UserService, 'findUser');
 mock.method(UserService, 'createUser');
@@ -59,7 +61,7 @@ describe('UserController', () => {
       await UserController.signup(req, res, next);
 
       assert.strictEqual(res.statusCode, 201);
-      assert.deepStrictEqual(res.jsonData, { message: "Signed up.", jwt: 'mock_token' });
+      assert.deepStrictEqual(res.jsonData, { message: SIGNED_UP, jwt: 'mock_token' });
       assert.strictEqual((UserService.findUser as any).mock.callCount(), 1);
       assert.strictEqual((UserService.createUser as any).mock.callCount(), 1);
     });
@@ -137,7 +139,7 @@ describe('UserController', () => {
         },
         (error: any) => {
           assert(error instanceof Error);
-          assert.strictEqual(error.message, "Password is incorrect.");
+          assert.strictEqual(error.message, WRONG_PASSWORD);
           assert.strictEqual(res.statusCode, 401);
           return true;
         }
@@ -172,7 +174,7 @@ describe('UserController', () => {
         },
         (error: any) => {
           assert(error instanceof Error);
-          assert.strictEqual(error.message, "User not found.");
+          assert.strictEqual(error.message, USER_NOT_FOUND);
           assert.strictEqual(res.statusCode, 404);
           return true;
         }
@@ -206,7 +208,7 @@ describe('UserController', () => {
         },
         (error: any) => {
           assert(error instanceof Error);
-          assert.strictEqual(error.message, "User not found.");
+          assert.strictEqual(error.message, USER_NOT_FOUND);
           assert.strictEqual(res.statusCode, 404);
           return true;
         }
@@ -224,7 +226,7 @@ describe('UserController', () => {
       await UserController.deleteUser(req, res, next);
 
       assert.strictEqual(res.statusCode, 200);
-      assert.deepStrictEqual(res.jsonData, { message: 'User deleted.' });
+      assert.deepStrictEqual(res.jsonData, { message: USER_DELETED });
       assert.strictEqual((UserService.deleteUser as any).mock.callCount(), 1);
     });
 
@@ -237,7 +239,7 @@ describe('UserController', () => {
         },
         (error: any) => {
           assert(error instanceof Error);
-          assert.strictEqual(error.message, "User not found.");
+          assert.strictEqual(error.message, USER_NOT_FOUND);
           assert.strictEqual(res.statusCode, 404);
           return true;
         }

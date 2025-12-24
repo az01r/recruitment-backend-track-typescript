@@ -69,7 +69,7 @@ const router = Router();
  *                 example: testtest
  *     responses:
  *       201:
- *         description: The user was successfully created
+ *         description: Signed up.
  *         content:
  *           application/json:
  *             schema:
@@ -80,7 +80,7 @@ const router = Router();
  *                 jwt:
  *                   type: string
  *       409:
- *         description: User already registered
+ *         description: User already registered.
  *       422:
  *         description: Validation error
  */
@@ -110,7 +110,7 @@ router.post('/signup', signupValidation, validateRequest, UserController.signup)
  *                 example: testtest
  *     responses:
  *       200:
- *         description: The user was successfully logged in
+ *         description: Logged in.
  *         content:
  *           application/json:
  *             schema:
@@ -121,9 +121,9 @@ router.post('/signup', signupValidation, validateRequest, UserController.signup)
  *                 jwt:
  *                   type: string
  *       401:
- *         description: Invalid credentials
+ *         description: Unauthorized
  *       404:
- *         description: User not found
+ *         description: E-Mail not registered yet.
  *       422:
  *         description: Validation error
  */
@@ -133,7 +133,7 @@ router.post('/login', loginValidation, validateRequest, UserController.login);
  * @swagger
  * /user:
  *   get:
- *     summary: Get the current user profile
+ *     summary: Get the logged in user profile
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
@@ -144,6 +144,8 @@ router.post('/login', loginValidation, validateRequest, UserController.login);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: User not found
  */
@@ -153,7 +155,7 @@ router.get('/', isAuth, UserController.getUser);
  * @swagger
  * /user:
  *   put:
- *     summary: Update the current user profile
+ *     summary: Update the logged in user profile
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
@@ -182,11 +184,13 @@ router.get('/', isAuth, UserController.getUser);
  *                 example: 1990-01-01
  *     responses:
  *       200:
- *         description: The updated user profile
+ *         description: User updated
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: User not found
  *       422:
@@ -198,13 +202,13 @@ router.put('/', isAuth, updateValidation, validateRequest, UserController.update
  * @swagger
  * /user:
  *   delete:
- *     summary: Delete the current user profile
+ *     summary: Delete the logged in user profile
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: The user profile was deleted
+ *         description: User deleted
  *         content:
  *           application/json:
  *             schema:
@@ -212,7 +216,9 @@ router.put('/', isAuth, updateValidation, validateRequest, UserController.update
  *               properties:
  *                 message:
  *                   type: string
- *                   example: User deleted.
+ *                   example: User deleted
+ *       401:
+ *         description: Unauthorized
  *       404:
  *         description: User not found
  */

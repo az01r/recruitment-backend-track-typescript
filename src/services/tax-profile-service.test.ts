@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import { TaxProfileService } from "./tax-profile-service.js";
 import { Prisma } from '../generated/prisma/client.js';
 import ReqValidationError from '../types/request-validation-error.js';
+import { TAX_PROFILE_NOT_FOUND } from '../utils/constants.js';
 
 describe('TaxProfileService', () => {
   let taxProfileService: TaxProfileService;
@@ -105,7 +106,7 @@ describe('TaxProfileService', () => {
         },
         (error: any) => {
           assert(error instanceof ReqValidationError);
-          assert.strictEqual(error.message, "Tax Profile not found or does not belong to user.");
+          assert.strictEqual(error.message, TAX_PROFILE_NOT_FOUND);
           assert.strictEqual(error.statusCode, 404);
           return true;
         }
@@ -142,7 +143,7 @@ describe('TaxProfileService', () => {
         },
         (error: any) => {
           assert(error instanceof ReqValidationError);
-          assert.strictEqual(error.message, "Tax Profile not found or does not belong to user.");
+          assert.strictEqual(error.message, TAX_PROFILE_NOT_FOUND);
           assert.strictEqual(error.statusCode, 404);
           return true;
         }
