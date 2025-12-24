@@ -92,13 +92,13 @@ Integration tests are realized with supertest library.
 You can run tests directly in the container with the following (avaiable only if NODE_ENV !== 'production'):
 
 ```bash
-    docker-compose exec recruitment-backend node --import tsx --test src/**/*.test.ts
+docker-compose exec recruitment-backend node --import tsx --test src/**/*.test.ts
 ```
 
 or with the already setted npm script:
 
 ```bash
-    docker compose exec recruitment-backend npm run test
+docker compose exec recruitment-backend npm run test
 ```
 
 Note that to successfully run the integration tests you need to have the backend and the database containers running.
@@ -112,8 +112,8 @@ The project is shipped with a docker-compose file to ease the setup of the envir
 To run the project with docker compose you can run the following commands:
 
 ```bash
-    docker compose up --build
-    docker-compose exec recruitment-backend npx prisma migrate dev
+docker compose up --build
+docker-compose exec recruitment-backend npx prisma migrate dev
 ```
 
 The first command will build the backend image and start both the db and the backend containers.
@@ -123,7 +123,7 @@ The second command will run the database migrations. Note that it needs to be ex
 To stop the project you can run:
 
 ```bash
-    docker compose down
+docker compose down
 ```
 
 If NODE_ENV env variable is setted to `production`, the project will transpile the TypeScript code when creating backend image and will instal only production dependencies.
@@ -138,5 +138,5 @@ The swagger does not utilize it directly. Instead it uses options provided in th
 To generate the openapi.json file you can run the following command (defined in the package.json):
 
 ```bash
-    npm run openapi
+npm run openapi
 ```
