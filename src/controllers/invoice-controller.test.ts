@@ -2,7 +2,9 @@ import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import InvoiceController from './invoice-controller.js';
 import InvoiceService from '../services/invoice-service.js';
-import { INVOICE_DELETED, INVOICE_NOT_FOUND } from '../utils/constants.js';
+import { INVALID_DATE_RANGE, INVOICE_DELETED, INVOICE_NOT_FOUND } from '../utils/constants.js';
+import ReqValidationError from '../types/request-validation-error.js';
+import { Prisma } from '../generated/prisma/client.js';
 
 mock.method(InvoiceService, 'createInvoice');
 mock.method(InvoiceService, 'findInvoices');
@@ -68,34 +70,6 @@ describe('InvoiceController', () => {
         { id: 'invoice1', amount: 1000, status: 'PENDING', currency: 'EUR', createdAt: new Date(), updatedAt: new Date() },
         { id: 'invoice2', amount: 2000, status: 'PAID', currency: 'USD', createdAt: new Date(), updatedAt: new Date() }
       ];
-      req.query = { skip: '0', take: '50' };
-
-      (InvoiceService.findInvoices as any).mock.mockImplementationOnce(() => Promise.resolve(mockInvoices));
-
-      await InvoiceController.getInvoices(req, res, next);
-
-      assert.strictEqual(res.statusCode, 200);
-      assert.deepStrictEqual(res.jsonData, { invoices: mockInvoices });
-      assert.strictEqual((InvoiceService.findInvoices as any).mock.callCount(), 1);
-    });
-
-    it('should get logged user invoices filtered by tax profile', async () => {
-      const mockInvoices = [
-        { id: 'invoice1', taxProfileId: 'taxProfile123', amount: 1000, status: 'PENDING', currency: 'EUR', createdAt: new Date(), updatedAt: new Date() }
-      ];
-      req.query = { taxProfileId: 'taxProfile123', skip: '10', take: '20' };
-
-      (InvoiceService.findInvoices as any).mock.mockImplementationOnce(() => Promise.resolve(mockInvoices));
-
-      await InvoiceController.getInvoices(req, res, next);
-
-      assert.strictEqual(res.statusCode, 200);
-      assert.deepStrictEqual(res.jsonData, { invoices: mockInvoices });
-      assert.strictEqual((InvoiceService.findInvoices as any).mock.callCount(), 1);
-    });
-
-    it('should use default values for skip and take', async () => {
-      const mockInvoices: any[] = [];
       req.query = {};
 
       (InvoiceService.findInvoices as any).mock.mockImplementationOnce(() => Promise.resolve(mockInvoices));
@@ -103,18 +77,53 @@ describe('InvoiceController', () => {
       await InvoiceController.getInvoices(req, res, next);
 
       assert.strictEqual(res.statusCode, 200);
+      assert.deepStrictEqual(res.jsonData, { invoices: mockInvoices });
+      assert.strictEqual((InvoiceService.findInvoices as any).mock.callCount(), 1);
     });
 
     it('should use query params to filter invoices', async () => {
-      req.query = { taxProfileId: 'taxProfile123', skip: '10', take: '20', status: 'PENDING', currency: 'EUR' };
-      const { taxProfileId, skip, take, status, currency } = req.query;
+      req.query = { taxProfileId: 'taxProfile123', skip: '10', take: '20', status: 'PENDING', currency: 'EUR', gteCreatedAt: '2025-01-01', lteCreatedAt: '2025-12-31', gteUpdatedAt: '2025-01-01', lteUpdatedAt: '2025-12-31' };
+      const { taxProfileId, skip, take, status, currency, gteCreatedAt, lteCreatedAt, gteUpdatedAt, lteUpdatedAt } = req.query;
+      const where: Prisma.InvoiceWhereInput = { taxProfile: { userId: req.userId! }, taxProfileId, status, currency, createdAt: { gte: new Date(gteCreatedAt), lte: new Date(lteCreatedAt) }, updatedAt: { gte: new Date(gteUpdatedAt), lte: new Date(lteUpdatedAt) } };
 
       (InvoiceService.findInvoices as any).mock.mockImplementationOnce(() => Promise.resolve([]));
 
       await InvoiceController.getInvoices(req, res, next);
 
       const callArgs = (InvoiceService.findInvoices as any).mock.calls[0].arguments;
-      assert.deepStrictEqual(callArgs, [{ taxProfile: { userId: 'user123' }, taxProfileId, status, currency }, Number(skip), Number(take)]);
+      assert.deepStrictEqual(callArgs, [where, Number(skip), Number(take)]);
+    });
+
+    it('should throw error if gteCreatedAt is after lteCreatedAt', async () => {
+      req.query = { gteCreatedAt: '2022-12-31', lteCreatedAt: '2022-01-01' };
+
+      await assert.rejects(
+        async () => {
+          await InvoiceController.getInvoices(req, res, next);
+        },
+        (error: any) => {
+          assert(error instanceof ReqValidationError);
+          assert.strictEqual(error.message, INVALID_DATE_RANGE);
+          assert.strictEqual(error.statusCode, 422);
+          return true;
+        }
+      );
+    });
+
+    it('should throw error if gteUpdatedAt is after lteUpdatedAt', async () => {
+      req.query = { gteUpdatedAt: '2022-12-31', lteUpdatedAt: '2022-01-01' };
+
+      await assert.rejects(
+        async () => {
+          await InvoiceController.getInvoices(req, res, next);
+        },
+        (error: any) => {
+          assert(error instanceof ReqValidationError);
+          assert.strictEqual(error.message, INVALID_DATE_RANGE);
+          assert.strictEqual(error.statusCode, 422);
+          return true;
+        }
+      );
     });
   });
 

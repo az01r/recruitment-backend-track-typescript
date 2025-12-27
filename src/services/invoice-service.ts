@@ -2,7 +2,7 @@ import prismaClientSingleton from "../utils/prisma.js";
 import { Prisma, PrismaClient } from "../generated/prisma/client.js";
 import ReqValidationError from "../types/request-validation-error.js";
 import TaxProfileService, { TaxProfileService as TaxProfileServiceClass } from "./tax-profile-service.js";
-import { INVOICE_NOT_FOUND, TAX_PROFILE_NOT_FOUND } from "../utils/constants.js";
+import { DEFAULT_SKIP, DEFAULT_TAKE, INVOICE_NOT_FOUND, TAX_PROFILE_NOT_FOUND } from "../utils/constants.js";
 
 class InvoiceService {
   private prismaClient: PrismaClient;
@@ -24,8 +24,8 @@ class InvoiceService {
   findInvoices = async (where: Prisma.InvoiceWhereInput, skip?: number, take?: number) => {
     return await this.prismaClient.invoice.findMany({
       where,
-      skip: skip || 0,
-      take: take || 10,
+      skip: skip || DEFAULT_SKIP,
+      take: take || DEFAULT_TAKE,
       orderBy: {
         createdAt: 'desc'
       }

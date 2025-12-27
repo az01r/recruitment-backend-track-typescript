@@ -15,3 +15,8 @@ export const TAX_PROFILE_DELETED = 'Tax profile deleted';
 export const INVOICE_NOT_FOUND = 'Invoice does not exist or does not belong to user';
 export const INVOICE_DELETED = 'Invoice deleted';
 export const NOT_FOUND = 'Not Found';
+
+export const DEFAULT_SKIP = 0;
+export const DEFAULT_TAKE = 10;
+
+export const INVALID_DATE_RANGE = 'Invalid date range';

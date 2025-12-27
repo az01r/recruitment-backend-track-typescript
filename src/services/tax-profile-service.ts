@@ -1,6 +1,6 @@
 import { Prisma, PrismaClient } from "../generated/prisma/client.js";
 import ReqValidationError from "../types/request-validation-error.js";
-import { TAX_PROFILE_NOT_FOUND } from "../utils/constants.js";
+import { DEFAULT_SKIP, DEFAULT_TAKE, TAX_PROFILE_NOT_FOUND } from "../utils/constants.js";
 import prismaClientSingleton from "../utils/prisma.js";
 
 class TaxProfileService {
@@ -16,8 +16,8 @@ class TaxProfileService {
 
   findTaxProfiles = async (where: Prisma.TaxProfileWhereInput, skip?: number, take?: number) => {
     return await this.prismaClient.taxProfile.findMany({
-      skip: skip || 0,
-      take: take || 10,
+      skip: skip || DEFAULT_SKIP,
+      take: take || DEFAULT_TAKE,
       where,
       orderBy: {
         createdAt: "desc"

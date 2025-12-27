@@ -92,6 +92,34 @@ const router = Router();
  *             - GBP
  *         required: false
  *         description: Filter by currency
+ *       - name: gteCreatedAt
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *           format: date
+ *           example: 2025-12-27
+ *       - name: lteCreatedAt
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *           format: date
+ *           example: 2025-12-27
+ *       - name: gteUpdatedAt
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *           format: date
+ *           example: 2025-12-27
+ *       - name: lteUpdatedAt
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
+ *           format: date
+ *           example: 2025-12-27
  *     responses:
  *       200:
  *         description: The list of invoices
