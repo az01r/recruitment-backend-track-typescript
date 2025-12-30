@@ -2,7 +2,6 @@ import type { Request, Response, NextFunction } from "express";
 import InvoiceService from "../services/invoice-service.js";
 import { Currency, InvoiceStatus, Prisma } from "../generated/prisma/client.js";
 import { INVOICE_DELETED, INVOICE_NOT_FOUND } from "../utils/constants.js";
-import { getValidatedWhereDateTimeFilter } from "../utils/dates.js";
 
 class InvoiceController {
 
@@ -14,17 +13,18 @@ class InvoiceController {
   }
 
   getInvoices = async (req: Request, res: Response, _next: NextFunction) => {
-    const { taxProfileId, skip, take, status, currency, gteCreatedAt, lteCreatedAt, gteUpdatedAt, lteUpdatedAt } = req.query;
+    const { taxProfileId, skip, take, status, currency, amount, gteCreatedAt, lteCreatedAt, gteUpdatedAt, lteUpdatedAt } = req.query;
     const where: Prisma.InvoiceWhereInput = {};
 
     where.taxProfile = {
       userId: req.userId!
     };
     if (taxProfileId) where.taxProfileId = String(taxProfileId);
+    if (amount) where.amount = +amount;
     if (status) where.status = status as InvoiceStatus;
     if (currency) where.currency = currency as Currency;
-    where.createdAt = getValidatedWhereDateTimeFilter(gteCreatedAt, lteCreatedAt);
-    where.updatedAt = getValidatedWhereDateTimeFilter(gteUpdatedAt, lteUpdatedAt);
+    where.createdAt = { gte: gteCreatedAt ? gteCreatedAt as string : undefined, lte: lteCreatedAt ? lteCreatedAt as string : undefined };
+    where.updatedAt = { gte: gteUpdatedAt ? gteUpdatedAt as string : undefined, lte: lteUpdatedAt ? lteUpdatedAt as string : undefined };
 
     const invoices = await InvoiceService.findInvoices(where, skip ? Number(skip) : undefined, take ? Number(take) : undefined);
     res.status(200).json({ invoices });

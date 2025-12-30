@@ -2,7 +2,7 @@ import { Router } from 'express';
 import TaxProfileController from '../controllers/tax-profile-controller.js';
 import { isAuth } from '../middlewares/is-auth.js';
 import { validateRequest } from '../middlewares/request-validation.js';
-import { createValidation, updateValidation } from '../utils/validators/tax-profile-validators.js';
+import { createValidation, readValidation, updateValidation } from '../utils/validators/tax-profile-validators.js';
 
 const router = Router();
 
@@ -85,6 +85,11 @@ const router = Router();
  *         required: false
  *         schema:
  *           type: string
+ *       - name: address
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: string
  *       - name: city
  *         in: query
  *         required: false
@@ -105,29 +110,29 @@ const router = Router();
  *         required: false
  *         schema:
  *           type: string
- *           format: date
- *           example: 2025-12-27
+ *           format: date-time
+ *           example: 2025-12-01T00:00:00.000Z
  *       - name: lteCreatedAt
  *         in: query
  *         required: false
  *         schema:
  *           type: string
- *           format: date
- *           example: 2025-12-27
+ *           format: date-time
+ *           example: 2025-12-30T00:00:00.000Z
  *       - name: gteUpdatedAt
  *         in: query
  *         required: false
  *         schema:
  *           type: string
- *           format: date
- *           example: 2025-12-27
+ *           format: date-time
+ *           example: 2025-12-01T00:00:00.000Z
  *       - name: lteUpdatedAt
  *         in: query
  *         required: false
  *         schema:
  *           type: string
- *           format: date
- *           example: 2025-12-27
+ *           format: date-time
+ *           example: 2025-12-30T00:00:00.000Z
  *     responses:
  *       200:
  *         description: The list of tax profiles
@@ -143,7 +148,7 @@ const router = Router();
  *       401:
  *         description: Unauthorized
  */
-router.get('/', isAuth, TaxProfileController.getTaxProfiles);
+router.get('/', isAuth, readValidation, validateRequest, TaxProfileController.getTaxProfiles);
 
 /**
  * @swagger
@@ -154,8 +159,8 @@ router.get('/', isAuth, TaxProfileController.getTaxProfiles);
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         schema:
  *           type: string
  *         required: true
@@ -243,8 +248,8 @@ router.post('/', isAuth, createValidation, validateRequest, TaxProfileController
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         schema:
  *           type: string
  *         required: true
@@ -302,8 +307,8 @@ router.put('/:id', isAuth, updateValidation, validateRequest, TaxProfileControll
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         schema:
  *           type: string
  *         required: true

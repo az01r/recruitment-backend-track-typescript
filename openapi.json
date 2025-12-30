@@ -184,35 +184,41 @@
         ],
         "parameters": [
           {
+            "name": "skip",
             "in": "query",
-            "name": "taxProfileId",
+            "required": false,
             "schema": {
-              "type": "string"
+              "type": "integer"
             },
+            "description": "Skip the first n invoices"
+          },
+          {
+            "name": "take",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Take the next n invoices"
+          },
+          {
+            "name": "taxProfileId",
+            "in": "query",
             "required": false,
             "description": "Filter by tax profile id"
           },
           {
+            "name": "amount",
             "in": "query",
-            "name": "skip",
             "schema": {
               "type": "number"
             },
             "required": false,
-            "description": "Skip the first n invoices"
+            "description": "Filter by amount"
           },
           {
-            "in": "query",
-            "name": "take",
-            "schema": {
-              "type": "number"
-            },
-            "required": false,
-            "description": "Take the next n invoices"
-          },
-          {
-            "in": "query",
             "name": "status",
+            "in": "query",
             "schema": {
               "type": "string",
               "enum": [
@@ -225,8 +231,8 @@
             "description": "Filter by status"
           },
           {
-            "in": "query",
             "name": "currency",
+            "in": "query",
             "schema": {
               "type": "string",
               "enum": [
@@ -244,7 +250,8 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date-time",
+              "example": "2025-12-01T00:00:00.000Z"
             }
           },
           {
@@ -253,7 +260,8 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date-time",
+              "example": "2025-12-01T00:00:00.000Z"
             }
           },
           {
@@ -262,7 +270,8 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date-time",
+              "example": "2025-12-01T00:00:00.000Z"
             }
           },
           {
@@ -271,7 +280,8 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date-time",
+              "example": "2025-12-01T00:00:00.000Z"
             }
           }
         ],
@@ -394,8 +404,8 @@
         ],
         "parameters": [
           {
-            "in": "path",
             "name": "id",
+            "in": "path",
             "schema": {
               "type": "string"
             },
@@ -439,8 +449,8 @@
         ],
         "parameters": [
           {
-            "in": "path",
             "name": "id",
+            "in": "path",
             "schema": {
               "type": "string"
             },
@@ -522,8 +532,8 @@
         ],
         "parameters": [
           {
-            "in": "path",
             "name": "id",
+            "in": "path",
             "schema": {
               "type": "string"
             },
@@ -602,6 +612,14 @@
             }
           },
           {
+            "name": "address",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "city",
             "in": "query",
             "required": false,
@@ -631,7 +649,8 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date-time",
+              "example": "2025-12-01T00:00:00.000Z"
             }
           },
           {
@@ -640,7 +659,8 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date-time",
+              "example": "2025-12-01T00:00:00.000Z"
             }
           },
           {
@@ -649,7 +669,8 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date-time",
+              "example": "2025-12-01T00:00:00.000Z"
             }
           },
           {
@@ -658,7 +679,8 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date-time",
+              "example": "2025-12-01T00:00:00.000Z"
             }
           }
         ],
@@ -778,8 +800,8 @@
         ],
         "parameters": [
           {
-            "in": "path",
             "name": "id",
+            "in": "path",
             "schema": {
               "type": "string"
             },
@@ -823,8 +845,8 @@
         ],
         "parameters": [
           {
-            "in": "path",
             "name": "id",
+            "in": "path",
             "schema": {
               "type": "string"
             },
@@ -907,8 +929,8 @@
         ],
         "parameters": [
           {
-            "in": "path",
             "name": "id",
+            "in": "path",
             "schema": {
               "type": "string"
             },

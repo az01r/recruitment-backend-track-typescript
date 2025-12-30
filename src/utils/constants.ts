@@ -18,5 +18,3 @@ export const NOT_FOUND = 'Not Found';
 
 export const DEFAULT_SKIP = 0;
 export const DEFAULT_TAKE = 10;
-
-export const INVALID_DATE_RANGE = 'Invalid date range';

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import InvoiceController from '../controllers/invoice-controller.js';
 import { isAuth } from '../middlewares/is-auth.js';
 import { validateRequest } from '../middlewares/request-validation.js';
-import { saveInvoiceValidation, updateInvoiceValidation } from '../utils/validators/invoice-validators.js';
+import { readValidation, saveInvoiceValidation, updateInvoiceValidation } from '../utils/validators/invoice-validators.js';
 
 const router = Router();
 
@@ -54,26 +54,30 @@ const router = Router();
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: taxProfileId
+ *       - name: skip
+ *         in: query
+ *         required: false
  *         schema:
- *           type: string
+ *           type: integer
+ *         description: Skip the first n invoices
+ *       - name: take
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: integer
+ *         description: Take the next n invoices
+ *       - name: taxProfileId
+ *         in: query
  *         required: false
  *         description: Filter by tax profile id
- *       - in: query
- *         name: skip
+ *       - name: amount
+ *         in: query
  *         schema:
  *           type: number
  *         required: false
- *         description: Skip the first n invoices
- *       - in: query
- *         name: take
- *         schema:
- *           type: number
- *         required: false
- *         description: Take the next n invoices
- *       - in: query
- *         name: status
+ *         description: Filter by amount
+ *       - name: status
+ *         in: query
  *         schema:
  *           type: string
  *           enum:
@@ -82,8 +86,8 @@ const router = Router();
  *             - FAILED
  *         required: false
  *         description: Filter by status
- *       - in: query
- *         name: currency
+ *       - name: currency
+ *         in: query
  *         schema:
  *           type: string
  *           enum:
@@ -97,29 +101,29 @@ const router = Router();
  *         required: false
  *         schema:
  *           type: string
- *           format: date
- *           example: 2025-12-27
+ *           format: date-time
+ *           example: 2025-12-01T00:00:00.000Z
  *       - name: lteCreatedAt
  *         in: query
  *         required: false
  *         schema:
  *           type: string
- *           format: date
- *           example: 2025-12-27
+ *           format: date-time
+ *           example: 2025-12-30T00:00:00.000Z
  *       - name: gteUpdatedAt
  *         in: query
  *         required: false
  *         schema:
  *           type: string
- *           format: date
- *           example: 2025-12-27
+ *           format: date-time
+ *           example: 2025-12-01T00:00:00.000Z
  *       - name: lteUpdatedAt
  *         in: query
  *         required: false
  *         schema:
  *           type: string
- *           format: date
- *           example: 2025-12-27
+ *           format: date-time
+ *           example: 2025-12-30T00:00:00.000Z
  *     responses:
  *       200:
  *         description: The list of invoices
@@ -135,7 +139,7 @@ const router = Router();
  *       401:
  *         description: Unauthorized
  */
-router.get('/', isAuth, InvoiceController.getInvoices);
+router.get('/', isAuth, readValidation, validateRequest, InvoiceController.getInvoices);
 
 /**
  * @swagger
@@ -146,8 +150,8 @@ router.get('/', isAuth, InvoiceController.getInvoices);
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         schema:
  *           type: string
  *         required: true
@@ -237,8 +241,8 @@ router.post('/', isAuth, saveInvoiceValidation, validateRequest, InvoiceControll
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         schema:
  *           type: string
  *         required: true
@@ -296,8 +300,8 @@ router.put('/:id', isAuth, updateInvoiceValidation, validateRequest, InvoiceCont
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         schema:
  *           type: string
  *         required: true

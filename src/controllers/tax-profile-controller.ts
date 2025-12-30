@@ -2,7 +2,6 @@ import type { Request, Response, NextFunction } from "express";
 import { Prisma } from "../generated/prisma/client.js";
 import TaxProfileService from "../services/tax-profile-service.js";
 import { TAX_PROFILE_DELETED, TAX_PROFILE_NOT_FOUND } from "../utils/constants.js";
-import { getValidatedWhereDateTimeFilter } from "../utils/dates.js";
 
 class TaxProfileController {
 
@@ -14,19 +13,19 @@ class TaxProfileController {
   }
 
   getTaxProfiles = async (req: Request, res: Response, _next: NextFunction) => {
-    const { legalName, vatNumber, city, country, zipCode, gteCreatedAt, lteCreatedAt, gteUpdatedAt, lteUpdatedAt, skip, take } = req.query;
+    const { legalName, vatNumber, address, city, country, zipCode, gteCreatedAt, lteCreatedAt, gteUpdatedAt, lteUpdatedAt, skip, take } = req.query;
 
     const where: Prisma.TaxProfileWhereInput = {};
 
     where.userId = { equals: req.userId! };
     if (legalName) where.legalName = { contains: String(legalName) };
     if (vatNumber) where.vatNumber = { contains: String(vatNumber) };
+    if (address) where.address = { contains: String(address) };
     if (city) where.city = { contains: String(city) };
     if (country) where.country = { contains: String(country) };
     if (zipCode) where.zipCode = { contains: String(zipCode) };
-    where.createdAt = getValidatedWhereDateTimeFilter(gteCreatedAt, lteCreatedAt);
-    where.updatedAt = getValidatedWhereDateTimeFilter(gteUpdatedAt, lteUpdatedAt);
-
+    where.createdAt = { gte: gteCreatedAt ? gteCreatedAt as string : undefined, lte: lteCreatedAt ? lteCreatedAt as string : undefined };
+    where.updatedAt = { gte: gteUpdatedAt ? gteUpdatedAt as string : undefined, lte: lteUpdatedAt ? lteUpdatedAt as string : undefined };
     const taxProfiles = await TaxProfileService.findTaxProfiles(where, skip ? Number(skip) : undefined, take ? Number(take) : undefined);
     res.status(200).json({ taxProfiles });
   }

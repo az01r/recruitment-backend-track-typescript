@@ -133,6 +133,39 @@ describe('Integration Tests: Tax Profile', () => {
     assert.strictEqual(response2.body.message, UNAUTHORIZED);
   });
 
+  it('GET /tax-profile should return 422 for invalid query params', async () => {
+    const response = await request(app)
+      .get(`/tax-profile`)
+      .query({
+        skip: 'invalid-skip',
+        take: 'invalid-take',
+        legalName: 'f',
+        vatNumber: 'f',
+        address: 'f',
+        city: 'f',
+        zipCode: 'f',
+        country: 'f',
+        gteCreatedAt: '2025-12-31T00:00:00.000Z',
+        lteCreatedAt: '2025-12-01T00:00:00.000Z',
+        gteUpdatedAt: '2025-12-31T00:00:00.000Z',
+        lteUpdatedAt: '2025-12-01T00:00:00.000Z',
+      })
+      .set('Authorization', `Bearer ${authToken}`)
+      .expect(422);
+    assert.strictEqual(response.body.message, VALIDATION_ERROR);
+    assert.strictEqual(response.body.errors.length, 10);
+    assert.strictEqual(response.body.errors[0].msg, 'Skip must be a non-negative integer.');
+    assert.strictEqual(response.body.errors[1].msg, 'Take must be a positive integer.');
+    assert.strictEqual(response.body.errors[2].msg, 'Legal name must be at least 2 characters long.');
+    assert.strictEqual(response.body.errors[3].msg, 'VAT number must be at least 2 characters long.');
+    assert.strictEqual(response.body.errors[4].msg, 'Address must be at least 2 characters long.');
+    assert.strictEqual(response.body.errors[5].msg, 'City must be at least 2 characters long.');
+    assert.strictEqual(response.body.errors[6].msg, 'Country must be at least 2 characters long.');
+    assert.strictEqual(response.body.errors[7].msg, 'Zip code must be at least 2 characters long.');
+    assert.strictEqual(response.body.errors[8].msg, 'lteCreatedAt must be after gteCreatedAt');
+    assert.strictEqual(response.body.errors[9].msg, 'lteUpdatedAt must be after gteUpdatedAt');
+  });
+
   it('GET /tax-profile/:id should return a single tax profile', async () => {
     const response = await request(app)
       .get(`/tax-profile/${taxProfileId}`)

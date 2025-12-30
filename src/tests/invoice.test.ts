@@ -165,6 +165,37 @@ describe('Integration Tests: Invoice', () => {
     assert.strictEqual(response2.body.message, UNAUTHORIZED);
   });
 
+
+
+  it('GET /invoice should return 422 for invalid query params', async () => {
+    const response = await request(app)
+      .get(`/invoice`)
+      .query({
+        skip: 'invalid-skip',
+        take: 'invalid-take',
+        taxProfileId: 'f',
+        amount: 'invalid-amount',
+        status: 'invalid-status',
+        currency: 'invalid-currency',
+        gteCreatedAt: '2025-12-31T00:00:00.000Z',
+        lteCreatedAt: '2025-12-01T00:00:00.000Z',
+        gteUpdatedAt: '2025-12-31T00:00:00.000Z',
+        lteUpdatedAt: '2025-12-01T00:00:00.000Z',
+      })
+      .set('Authorization', `Bearer ${authToken}`)
+      .expect(422);
+    assert.strictEqual(response.body.message, VALIDATION_ERROR);
+    assert.strictEqual(response.body.errors.length, 8);
+    assert.strictEqual(response.body.errors[0].msg, 'Skip must be a non-negative integer.');
+    assert.strictEqual(response.body.errors[1].msg, 'Take must be a positive integer.');
+    assert.strictEqual(response.body.errors[2].msg, 'Tax Profile ID must be at least 2 characters long.');
+    assert.strictEqual(response.body.errors[3].msg, 'Amount must be a positive number.');
+    assert.strictEqual(response.body.errors[4].msg, 'Status must be one of PENDING, PAID, CANCELLED.');
+    assert.strictEqual(response.body.errors[5].msg, 'Currency must be one of EUR, USD, GBP.');
+    assert.strictEqual(response.body.errors[6].msg, 'lteCreatedAt must be after gteCreatedAt');
+    assert.strictEqual(response.body.errors[7].msg, 'lteUpdatedAt must be after gteUpdatedAt');
+  });
+
   it('GET /invoice/:id should return a single invoice', async () => {
     const response = await request(app)
       .get(`/invoice/${invoiceId}`)

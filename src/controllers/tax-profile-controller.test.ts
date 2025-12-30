@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import TaxProfileController from './tax-profile-controller.js';
 import TaxProfileService from '../services/tax-profile-service.js';
 import { Prisma } from '../generated/prisma/client.js';
-import { INVALID_DATE_RANGE, TAX_PROFILE_DELETED, TAX_PROFILE_NOT_FOUND } from '../utils/constants.js';
+import { TAX_PROFILE_DELETED, TAX_PROFILE_NOT_FOUND } from '../utils/constants.js';
 import ReqValidationError from '../types/request-validation-error.js';
 
 mock.method(TaxProfileService, 'createTaxProfile');
@@ -82,8 +82,8 @@ describe('TaxProfileController', () => {
     });
 
     it('should use query params to filter tax profiles', async () => {
-      req.query = { userId: 'user123', skip: '10', take: '20', legalName: 'Legal Name', vatNumber: 'VAT Number', city: 'City', country: 'Country', zipCode: '12345', gteCreatedAt: '2025-01-01', lteCreatedAt: '2025-12-31', gteUpdatedAt: '2025-01-01', lteUpdatedAt: '2025-12-31' };
-      const where: Prisma.TaxProfileWhereInput = { userId: { equals: 'user123' }, legalName: { contains: 'Legal Name' }, vatNumber: { contains: 'VAT Number' }, city: { contains: 'City' }, country: { contains: 'Country' }, zipCode: { contains: '12345' }, createdAt: { gte: new Date(req.query.gteCreatedAt), lte: new Date(req.query.lteCreatedAt) }, updatedAt: { gte: new Date(req.query.gteUpdatedAt), lte: new Date(req.query.lteUpdatedAt) } };
+      req.query = { userId: 'user123', skip: '10', take: '20', legalName: 'Legal Name', vatNumber: 'VAT Number', city: 'City', country: 'Country', zipCode: '12345', gteCreatedAt: '2025-01-01T00:00:00.000Z', lteCreatedAt: '2025-12-31T00:00:00.000Z', gteUpdatedAt: '2025-01-01T00:00:00.000Z', lteUpdatedAt: '2025-12-31T00:00:00.000Z' };
+      const where: Prisma.TaxProfileWhereInput = { userId: { equals: 'user123' }, legalName: { contains: 'Legal Name' }, vatNumber: { contains: 'VAT Number' }, city: { contains: 'City' }, country: { contains: 'Country' }, zipCode: { contains: '12345' }, createdAt: { gte: req.query.gteCreatedAt, lte: req.query.lteCreatedAt }, updatedAt: { gte: req.query.gteUpdatedAt, lte: req.query.lteUpdatedAt } };
 
       (TaxProfileService.findTaxProfiles as any).mock.mockImplementationOnce(() => Promise.resolve([]));
 
@@ -91,38 +91,6 @@ describe('TaxProfileController', () => {
 
       const callArgs = (TaxProfileService.findTaxProfiles as any).mock.calls[0].arguments;
       assert.deepStrictEqual(callArgs, [where, Number(req.query.skip), Number(req.query.take)]);
-    });
-
-    it('should throw error if gteCreatedAt is after lteCreatedAt', async () => {
-      req.query = { gteCreatedAt: '2022-12-31', lteCreatedAt: '2022-01-01' };
-
-      await assert.rejects(
-        async () => {
-          await TaxProfileController.getTaxProfiles(req, res, next);
-        },
-        (error: any) => {
-          assert(error instanceof ReqValidationError);
-          assert.strictEqual(error.message, INVALID_DATE_RANGE);
-          assert.strictEqual(error.statusCode, 422);
-          return true;
-        }
-      );
-    });
-
-    it('should throw error if gteUpdatedAt is after lteUpdatedAt', async () => {
-      req.query = { gteUpdatedAt: '2022-12-31', lteUpdatedAt: '2022-01-01' };
-
-      await assert.rejects(
-        async () => {
-          await TaxProfileController.getTaxProfiles(req, res, next);
-        },
-        (error: any) => {
-          assert(error instanceof ReqValidationError);
-          assert.strictEqual(error.message, INVALID_DATE_RANGE);
-          assert.strictEqual(error.statusCode, 422);
-          return true;
-        }
-      );
     });
   });
 
