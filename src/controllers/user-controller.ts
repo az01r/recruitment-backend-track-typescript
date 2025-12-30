@@ -51,19 +51,25 @@ class UserController {
       res.status(404);
       throw new Error(USER_NOT_FOUND);
     }
-    res.status(200).json(user);
+    const { password, ...userWithoutPassword } = user;
+    res.status(200).json(userWithoutPassword);
   }
 
   updateUser = async (req: Request, res: Response, _next: NextFunction) => {
     const { email, password, firstName, lastName, birthDate } = req.body;
-    const data: Prisma.UserUpdateInput = { email, password, firstName, lastName, birthDate: birthDate ? new Date(birthDate) : undefined };
+    let hashedPassword: string | undefined = undefined;
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, 12);
+    }
+    const data: Prisma.UserUpdateInput = { email, password: hashedPassword, firstName, lastName, birthDate: birthDate ? new Date(birthDate) : undefined };
     const where: Prisma.UserWhereUniqueInput = { id: req.userId! };
     const user = await UserService.updateUser(where, data);
     if (!user) {
       res.status(404);
       throw new Error(USER_NOT_FOUND);
     }
-    res.status(200).json(user);
+    const { password: _, ...userWithoutPassword } = user;
+    res.status(200).json(userWithoutPassword);
   }
 
   deleteUser = async (req: Request, res: Response, _next: NextFunction) => {

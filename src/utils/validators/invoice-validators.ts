@@ -1,6 +1,6 @@
 import { body, query } from 'express-validator';
 
-export const saveInvoiceValidation = [
+export const createValidation = [
   body('taxProfileId')
     .trim()
     .notEmpty()
@@ -17,7 +17,7 @@ export const saveInvoiceValidation = [
     .withMessage('Currency must be one of EUR, USD, GBP.')
 ];
 
-export const readValidation = [
+export const readManyValidation = [
   query('skip')
     .optional()
     .isInt({ min: 0 })
@@ -82,7 +82,7 @@ export const readValidation = [
     }),
 ];
 
-export const updateInvoiceValidation = [
+export const updateValidation = [
   body('amount')
     .optional()
     .isFloat({ min: 0 })

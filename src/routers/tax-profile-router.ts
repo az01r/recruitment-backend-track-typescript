@@ -2,7 +2,7 @@ import { Router } from 'express';
 import TaxProfileController from '../controllers/tax-profile-controller.js';
 import { isAuth } from '../middlewares/is-auth.js';
 import { validateRequest } from '../middlewares/request-validation.js';
-import { createValidation, readValidation, updateValidation } from '../utils/validators/tax-profile-validators.js';
+import { createValidation, readManyValidation, updateValidation } from '../utils/validators/tax-profile-validators.js';
 
 const router = Router();
 
@@ -48,7 +48,7 @@ const router = Router();
  *       example:
  *         id: d5fE_asz
  *         userId: userId1234
- *         legalName: Acme Corp
+ *         legalName: Multidialogo
  *         vatNumber: IT12345678901
  *         address: Via Roma 1
  *         city: Turin
@@ -148,7 +148,7 @@ const router = Router();
  *       401:
  *         description: Unauthorized
  */
-router.get('/', isAuth, readValidation, validateRequest, TaxProfileController.getTaxProfiles);
+router.get('/', isAuth, readManyValidation, validateRequest, TaxProfileController.getTaxProfiles);
 
 /**
  * @swagger

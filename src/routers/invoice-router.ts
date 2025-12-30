@@ -2,7 +2,7 @@ import { Router } from 'express';
 import InvoiceController from '../controllers/invoice-controller.js';
 import { isAuth } from '../middlewares/is-auth.js';
 import { validateRequest } from '../middlewares/request-validation.js';
-import { readValidation, saveInvoiceValidation, updateInvoiceValidation } from '../utils/validators/invoice-validators.js';
+import { createValidation, readManyValidation, updateValidation } from '../utils/validators/invoice-validators.js';
 
 const router = Router();
 
@@ -139,7 +139,7 @@ const router = Router();
  *       401:
  *         description: Unauthorized
  */
-router.get('/', isAuth, readValidation, validateRequest, InvoiceController.getInvoices);
+router.get('/', isAuth, readManyValidation, validateRequest, InvoiceController.getInvoices);
 
 /**
  * @swagger
@@ -230,7 +230,7 @@ router.get('/:id', isAuth, InvoiceController.getInvoice);
  *       422:
  *         description: Validation error
  */
-router.post('/', isAuth, saveInvoiceValidation, validateRequest, InvoiceController.createInvoice);
+router.post('/', isAuth, createValidation, validateRequest, InvoiceController.createInvoice);
 
 /**
  * @swagger
@@ -289,7 +289,7 @@ router.post('/', isAuth, saveInvoiceValidation, validateRequest, InvoiceControll
  *       422:
  *         description: Validation error
  */
-router.put('/:id', isAuth, updateInvoiceValidation, validateRequest, InvoiceController.updateInvoice);
+router.put('/:id', isAuth, updateValidation, validateRequest, InvoiceController.updateInvoice);
 
 /**
  * @swagger

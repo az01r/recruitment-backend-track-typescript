@@ -27,7 +27,7 @@ export const createValidation = [
     .withMessage('Country must be at least 2 characters long.')
 ];
 
-export const readValidation = [
+export const readManyValidation = [
   query('skip')
     .optional()
     .isInt({ min: 0 })
