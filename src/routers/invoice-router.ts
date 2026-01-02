@@ -32,7 +32,7 @@ const router = Router();
  *           description: The invoice amount
  *         status:
  *           type: string
- *           description: The invoice status. Possible values [ PAID, PENDING, FAILED ]
+ *           description: The invoice status. Possible values [ PAID, PENDING, CANCELLED ]
  *         currency:
  *           type: string
  *           description: The invoice currency. Possible values [ EUR, USD, GBP ]
@@ -83,7 +83,7 @@ const router = Router();
  *           enum:
  *             - PAID
  *             - PENDING
- *             - FAILED
+ *             - CANCELLED
  *         required: false
  *         description: Filter by status
  *       - name: currency
@@ -138,6 +138,8 @@ const router = Router();
  *                     $ref: '#/components/schemas/Invoice'
  *       401:
  *         description: Unauthorized
+ *       422:
+ *         description: Validation error
  */
 router.get('/', isAuth, readManyValidation, validateRequest, InvoiceController.getInvoices);
 
@@ -205,7 +207,7 @@ router.get('/:id', isAuth, InvoiceController.getInvoice);
  *                 enum:
  *                   - PAID
  *                   - PENDING
- *                   - FAILED
+ *                   - CANCELLED
  *               currency:
  *                 type: string
  *                 example: EUR
@@ -264,7 +266,7 @@ router.post('/', isAuth, createValidation, validateRequest, InvoiceController.cr
  *                 enum:
  *                   - PAID
  *                   - PENDING
- *                   - FAILED
+ *                   - CANCELLED
  *               currency:
  *                 type: string
  *                 example: EUR

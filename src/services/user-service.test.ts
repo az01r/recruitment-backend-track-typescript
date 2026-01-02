@@ -1,138 +1,259 @@
 import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
-import { UserService } from "./user-service.js";
-import { Prisma } from '../generated/prisma/client.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import UserService from "./user-service.js";
+import { Prisma, User } from '../generated/prisma/client.js';
+import { CreateUserDTO, ResponseUserDTO, UpdateUserDTO } from '../types/user-dto.js';
+import UserDAO from '../daos/user-dao.js';
+import ReqValidationError from '../types/request-validation-error.js';
+import { EMAIL_NOT_REGISTERED, USER_ALREADY_REGISTERED, USER_NOT_FOUND, WRONG_PASSWORD } from '../utils/constants.js';
+
+mock.method(bcrypt, 'hash', () => 'hashed_password');
+mock.method(bcrypt, 'compare');
+mock.method(jwt, 'sign', () => 'mock_token');
+mock.method(UserDAO, 'createUser');
+mock.method(UserDAO, 'findUser');
+mock.method(UserDAO, 'updateUser');
+mock.method(UserDAO, 'deleteUser');
 
 describe('UserService', () => {
-  let userService: UserService;
-  let prismaMock: any;
-
   beforeEach(() => {
-    prismaMock = {
-      user: {
-        create: mock.fn(),
-        findUnique: mock.fn(),
-        update: mock.fn(),
-        delete: mock.fn(),
-      },
-    };
-    userService = new UserService(prismaMock);
+    (bcrypt.compare as any).mock.resetCalls();
+    (bcrypt.hash as any).mock.resetCalls();
+    (jwt.sign as any).mock.resetCalls();
+    (UserDAO.createUser as any).mock.resetCalls();
+    (UserDAO.findUser as any).mock.resetCalls();
+    (UserDAO.updateUser as any).mock.resetCalls();
+    (UserDAO.deleteUser as any).mock.resetCalls();
   });
 
   after(() => {
     mock.reset();
   });
 
-  describe('createUser', () => {
-    it('should create a new user', async () => {
-      const userData: Prisma.UserCreateInput = { email: 'test@test.com', password: 'testtest' };
+  describe('signup', () => {
+    it('should signup a new user', async () => {
+      const userDto: CreateUserDTO = { email: 'test@test.com', password: 'testtest' };
+      const createdUser: User = { id: '1', email: 'test@test.com', password: 'hashed_password', firstName: null, lastName: null, birthDate: null, createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
 
-      const createdUser = { id: '1', ...userData, createdAt: new Date(), updatedAt: new Date() };
-      prismaMock.user.create.mock.mockImplementationOnce(() => Promise.resolve(createdUser));
+      (UserDAO.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
+      (UserDAO.createUser as any).mock.mockImplementationOnce(() => Promise.resolve(createdUser));
 
-      const result = await userService.createUser(userData);
+      const token = await UserService.signup(userDto);
 
-      const callArgs = prismaMock.user.create.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, { data: userData });
-      assert.deepStrictEqual(result, createdUser);
-      assert.strictEqual(prismaMock.user.create.mock.callCount(), 1);
+      const callArgs = (UserDAO.createUser as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [{ email: userDto.email, password: 'hashed_password' }]);
+      assert.deepStrictEqual(token, 'mock_token');
+      assert.strictEqual((UserDAO.findUser as any).mock.callCount(), 1);
+      assert.strictEqual((bcrypt.hash as any).mock.callCount(), 1);
+      assert.strictEqual((UserDAO.createUser as any).mock.callCount(), 1);
+      assert.strictEqual((jwt.sign as any).mock.callCount(), 1);
     });
 
-    describe('findUser', () => {
-      it('should find a user by email', async () => {
-        const where: Prisma.UserWhereUniqueInput = { email: 'test@test.com' };
+    it('should throw 409 error if user already exists', async () => {
+      const userDto: CreateUserDTO = { email: 'test@test.com', password: 'testtest' };
+      const alreadyExistingUser: User = { id: '1', email: 'test@test.com', password: 'hashed_password', firstName: null, lastName: null, birthDate: null, createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
 
-        const user = { id: '1', email: 'test@test.com', password: 'testtest' };
-        prismaMock.user.findUnique.mock.mockImplementationOnce(() => Promise.resolve(user));
+      (UserDAO.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(alreadyExistingUser));
 
-        const result = await userService.findUser(where);
+      await assert.rejects(
+        async () => {
+          await UserService.signup(userDto);
+        },
+        (error: any) => {
+          assert(error instanceof ReqValidationError);
+          assert.strictEqual(error.message, USER_ALREADY_REGISTERED);
+          assert.strictEqual(error.statusCode, 409);
+          return true;
+        }
+      );
+      assert.strictEqual((UserDAO.findUser as any).mock.callCount(), 1);
+      assert.strictEqual((bcrypt.hash as any).mock.callCount(), 0);
+      assert.strictEqual((UserDAO.createUser as any).mock.callCount(), 0);
+      assert.strictEqual((jwt.sign as any).mock.callCount(), 0);
+    });
+  });
 
-        const callArgs = prismaMock.user.findUnique.mock.calls[0].arguments[0];
-        assert.deepStrictEqual(callArgs, { where });
-        assert.deepStrictEqual(result, user);
-        assert.strictEqual(prismaMock.user.findUnique.mock.callCount(), 1);
-      });
+  describe('login', () => {
+    it('should login a user', async () => {
+      const userDto: CreateUserDTO = { email: 'test@test.com', password: 'testtest' };
+      const user: User = { id: '1', email: 'test@test.com', password: 'hashed_password', firstName: null, lastName: null, birthDate: null, createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
 
-      it('should find a user by id', async () => {
-        const where: Prisma.UserWhereUniqueInput = { id: '1' };
+      (UserDAO.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(user));
+      (bcrypt.compare as any).mock.mockImplementationOnce(() => Promise.resolve(true));
 
-        const user = { id: '1', email: 'test@test.com', password: 'testtest' };
-        prismaMock.user.findUnique.mock.mockImplementationOnce(() => Promise.resolve(user));
+      const token = await UserService.login(userDto);
 
-        const result = await userService.findUser(where);
-
-        const callArgs = prismaMock.user.findUnique.mock.calls[0].arguments[0];
-        assert.deepStrictEqual(callArgs, { where });
-        assert.deepStrictEqual(result, user);
-        assert.strictEqual(prismaMock.user.findUnique.mock.callCount(), 1);
-      });
-
-      it('should return null if user was not found', async () => {
-        const where: Prisma.UserWhereUniqueInput = { email: 'notfound@test.com' };
-
-        prismaMock.user.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
-
-        const result = await userService.findUser(where);
-
-        assert.strictEqual(result, null);
-        assert.strictEqual(prismaMock.user.findUnique.mock.callCount(), 1);
-      });
+      const callArgs = (UserDAO.findUser as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [{ email: userDto.email }]);
+      assert.deepStrictEqual(token, 'mock_token');
+      assert.strictEqual((UserDAO.findUser as any).mock.callCount(), 1);
+      assert.strictEqual((bcrypt.compare as any).mock.callCount(), 1);
+      assert.strictEqual((jwt.sign as any).mock.callCount(), 1);
     });
 
-    describe('updateUser', () => {
-      it('should update a user', async () => {
-        const where: Prisma.UserWhereUniqueInput = { id: '1' };
-        const data: Prisma.UserUpdateInput = { firstName: 'Updated Name' };
+    it('should throw 404 error if user is not found', async () => {
+      const userDto: CreateUserDTO = { email: 'test@test.com', password: 'testtest' };
 
-        const updatedUser = { id: '1', email: 'test@test.com', ...data };
-        prismaMock.user.update.mock.mockImplementationOnce(() => Promise.resolve(updatedUser));
+      (UserDAO.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
-        const result = await userService.updateUser(where, data);
-
-        const callArgs = prismaMock.user.update.mock.calls[0].arguments[0];
-        assert.deepStrictEqual(callArgs, { where, data });
-        assert.deepStrictEqual(result, updatedUser);
-        assert.strictEqual(prismaMock.user.update.mock.callCount(), 1);
-      });
-
-      it('should return null if user was not found', async () => {
-        const where: Prisma.UserWhereUniqueInput = { id: 'notfound' };
-        const data: Prisma.UserUpdateInput = { firstName: 'Updated Name' };
-
-        prismaMock.user.update.mock.mockImplementationOnce(() => Promise.resolve(null));
-
-        const result = await userService.updateUser(where, data);
-
-        assert.strictEqual(result, null);
-        assert.strictEqual(prismaMock.user.update.mock.callCount(), 1);
-      });
+      await assert.rejects(
+        async () => {
+          await UserService.login(userDto);
+        },
+        (error: any) => {
+          assert(error instanceof ReqValidationError);
+          assert.strictEqual(error.message, EMAIL_NOT_REGISTERED);
+          assert.strictEqual(error.statusCode, 404);
+          return true;
+        }
+      );
+      assert.strictEqual((UserDAO.findUser as any).mock.callCount(), 1);
+      assert.strictEqual((bcrypt.compare as any).mock.callCount(), 0);
+      assert.strictEqual((jwt.sign as any).mock.callCount(), 0);
     });
 
-    describe('deleteUser', () => {
-      it('should delete a user', async () => {
-        const where: Prisma.UserWhereUniqueInput = { id: '1' };
+    it('should throw 401 error if password is not correct', async () => {
+      const userDto: CreateUserDTO = { email: 'test@test.com', password: 'testtest' };
+      const user: User = { id: '1', email: 'test@test.com', password: 'hashed_password', firstName: null, lastName: null, birthDate: null, createdAt: new Date('2025'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
 
-        const deletedUser = { id: '1', email: 'test@test.com' };
-        prismaMock.user.delete.mock.mockImplementationOnce(() => Promise.resolve(deletedUser));
+      (UserDAO.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(user));
+      (bcrypt.compare as any).mock.mockImplementationOnce(() => Promise.resolve(false));
 
-        const result = await userService.deleteUser(where);
+      await assert.rejects(
+        async () => {
+          await UserService.login(userDto);
+        },
+        (error: any) => {
+          assert(error instanceof ReqValidationError);
+          assert.strictEqual(error.message, WRONG_PASSWORD);
+          assert.strictEqual(error.statusCode, 401);
+          return true;
+        }
+      );
+      assert.strictEqual((UserDAO.findUser as any).mock.callCount(), 1);
+      assert.strictEqual((bcrypt.compare as any).mock.callCount(), 1);
+      assert.strictEqual((jwt.sign as any).mock.callCount(), 0);
+    });
+  });
 
-        const callArgs = prismaMock.user.delete.mock.calls[0].arguments[0];
-        assert.deepStrictEqual(callArgs, { where });
-        assert.deepStrictEqual(result, deletedUser);
-        assert.strictEqual(prismaMock.user.delete.mock.callCount(), 1);
-      });
+  describe('getUser', () => {
+    it('should return an user', async () => {
+      const userId = '1';
+      const userDto: ResponseUserDTO = { id: userId, email: 'test@test.com', firstName: null, lastName: null, birthDate: null, createdAt: new Date('2025-01-01T00:00:00.000Z').toISOString(), updatedAt: new Date('2025-01-01T00:00:00.000Z').toISOString() };
+      const prismaUser: User = { id: userId, email: 'test@test.com', password: 'hashed_password', firstName: null, lastName: null, birthDate: null, createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
 
-      it('should return null if user was not found', async () => {
-        const where: Prisma.UserWhereUniqueInput = { id: 'notfound' };
+      (UserDAO.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(prismaUser));
 
-        prismaMock.user.delete.mock.mockImplementationOnce(() => Promise.resolve(null));
+      const result = await UserService.getUser(userId);
 
-        const result = await userService.deleteUser(where);
+      const callArgs = (UserDAO.findUser as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [{ id: userId }]);
+      assert.deepStrictEqual(result, userDto);
+      assert.strictEqual((UserDAO.findUser as any).mock.callCount(), 1);
+    });
 
-        assert.strictEqual(result, null);
-        assert.strictEqual(prismaMock.user.delete.mock.callCount(), 1);
-      });
+    it('should throw error 404 if user was not found', async () => {
+      const userId = '1';
+
+      (UserDAO.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
+
+      await assert.rejects(
+        async () => {
+          await UserService.getUser(userId);
+        },
+        (error: any) => {
+          assert(error instanceof ReqValidationError);
+          assert.strictEqual(error.message, USER_NOT_FOUND);
+          assert.strictEqual(error.statusCode, 404);
+          return true;
+        }
+      );
+      assert.strictEqual((UserDAO.findUser as any).mock.callCount(), 1);
+    });
+  });
+
+  describe('updateUser', () => {
+    it('should update an user', async () => {
+      const userId = '1';
+      const userDto: UpdateUserDTO = { id: userId, email: 'test@test.com', password: 'testtest', firstName: 'updated', lastName: 'updated', birthDate: '2025-12-31T00:00:00.000Z' };
+      const prismaUser: User = { id: userId, email: userDto.email!, password: 'hashed_password', firstName: userDto.firstName!, lastName: userDto.lastName!, birthDate: new Date(userDto.birthDate!), createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
+      const data: Prisma.UserUpdateInput = { email: userDto.email, password: 'hashed_password', firstName: userDto.firstName, lastName: userDto.lastName, birthDate: userDto.birthDate ? new Date(userDto.birthDate) : undefined };
+      const where: Prisma.UserWhereUniqueInput = { id: userDto.id };
+      const responseUserDto: ResponseUserDTO = {
+        id: prismaUser.id,
+        email: prismaUser.email,
+        firstName: prismaUser.firstName,
+        lastName: prismaUser.lastName,
+        birthDate: prismaUser.birthDate ? prismaUser.birthDate.toISOString() : null,
+        createdAt: prismaUser.createdAt.toISOString(),
+        updatedAt: prismaUser.updatedAt.toISOString()
+      };
+
+      (UserDAO.updateUser as any).mock.mockImplementationOnce(() => Promise.resolve(prismaUser));
+
+      const result = await UserService.updateUser(userDto);
+
+      const callArgs = (UserDAO.updateUser as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [where, data]);
+      assert.deepStrictEqual(result, responseUserDto);
+      assert.strictEqual((UserDAO.updateUser as any).mock.callCount(), 1);
+    });
+
+    it('should throw error 404 if user was not found', async () => {
+      const userId = '1';
+      const userDto: UpdateUserDTO = { id: userId, email: 'test@test.com', password: 'testtest', firstName: 'updated', lastName: 'updated', birthDate: '2025-12-31T00:00:00.000Z' };
+
+      (UserDAO.updateUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
+
+      await assert.rejects(
+        async () => {
+          await UserService.updateUser(userDto);
+        },
+        (error: any) => {
+          assert(error instanceof ReqValidationError);
+          assert.strictEqual(error.message, USER_NOT_FOUND);
+          assert.strictEqual(error.statusCode, 404);
+          return true;
+        }
+      );
+      assert.strictEqual((UserDAO.updateUser as any).mock.callCount(), 1);
+    });
+  });
+
+  describe('deleteUser', () => {
+    it('should delete an user', async () => {
+      const userId = '1';
+      const where: Prisma.UserWhereUniqueInput = { id: userId };
+      const prismaUser: User = { id: userId, email: 'test@test.com', password: 'hashed_password', firstName: null, lastName: null, birthDate: null, createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
+
+      (UserDAO.deleteUser as any).mock.mockImplementationOnce(() => Promise.resolve(prismaUser));
+
+      await UserService.deleteUser(userId);
+
+      const callArgs = (UserDAO.deleteUser as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [where]);
+      assert.strictEqual((UserDAO.deleteUser as any).mock.callCount(), 1);
+    });
+
+    it('should throw error 404 if user was not found', async () => {
+      const userId = '1';
+
+      (UserDAO.deleteUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
+
+      await assert.rejects(
+        async () => {
+          await UserService.deleteUser(userId);
+        },
+        (error: any) => {
+          assert(error instanceof ReqValidationError);
+          assert.strictEqual(error.message, USER_NOT_FOUND);
+          assert.strictEqual(error.statusCode, 404);
+          return true;
+        }
+      );
+      assert.strictEqual((UserDAO.deleteUser as any).mock.callCount(), 1);
     });
   });
 });

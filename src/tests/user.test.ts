@@ -3,8 +3,8 @@ import assert from 'node:assert';
 import request from 'supertest';
 import app from '../index.js';
 import prisma from '../utils/prisma.js';
-import { INVALID_EMAIL, SIGNED_UP, UNAUTHORIZED, USER_DELETED, VALIDATION_ERROR, WRONG_PASSWORD } from '../utils/constants.js';
-
+import { INVALID_EMAIL, LOGGED_IN, SIGNED_UP, UNAUTHORIZED, USER_DELETED, VALIDATION_ERROR, WRONG_PASSWORD } from '../utils/constants.js';
+import { ResponseUserDTO } from '../types/user-dto.js';
 
 describe('Integration Tests: User', () => {
   const testUser = {
@@ -12,9 +12,11 @@ describe('Integration Tests: User', () => {
     password: 'password123',
     firstName: 'Test',
     lastName: 'User',
-    birthDate: '1990-01-01'
+    birthDate: '1990-01-01',
   };
   let authToken: string;
+
+  let expectedUser: ResponseUserDTO;
 
   after(async () => {
     try {
@@ -76,6 +78,7 @@ describe('Integration Tests: User', () => {
 
     assert.ok(response.body.jwt);
     authToken = response.body.jwt;
+    assert.strictEqual(response.body.message, LOGGED_IN);
   });
 
   it('POST /user/login should return 422 for invalid email', async () => {
@@ -102,41 +105,28 @@ describe('Integration Tests: User', () => {
     assert.strictEqual(response.body.message, WRONG_PASSWORD);
   });
 
-  it('GET /user should return user profile', async () => {
-    const response = await request(app)
-      .get('/user')
-      .set('Authorization', `Bearer ${authToken}`)
-      .expect(200);
-
-    assert.strictEqual(response.body.email, testUser.email);
-  });
-
-  it('GET /user should return 401 with invalid token', async () => {
-    const response = await request(app)
-      .get('/user')
-      .expect(401);
-    assert.strictEqual(response.body.message, UNAUTHORIZED);
-    const response2 = await request(app)
-      .get('/user')
-      .set('Authorization', `Bearer invalid-token`)
-      .expect(401);
-    assert.strictEqual(response2.body.message, UNAUTHORIZED);
-  });
-
-  it('PUT /user should update profile', async () => {
+  it('PUT /user should update user', async () => {
     const response = await request(app)
       .put('/user')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        firstName: testUser.firstName,
-        lastName: testUser.lastName,
-        birthDate: testUser.birthDate
+        email: 'updated@test.com',
+        firstName: 'updated',
+        lastName: 'updated',
+        birthDate: '2000-01-01'
       })
       .expect(200);
 
-    assert.strictEqual(response.body.firstName, testUser.firstName);
-    assert.strictEqual(response.body.lastName, testUser.lastName);
-    assert.strictEqual(response.body.birthDate.split('T')[0], testUser.birthDate);
+    expectedUser = {
+      email: 'updated@test.com',
+      firstName: 'updated',
+      lastName: 'updated',
+      birthDate: '2000-01-01T00:00:00.000Z',
+      createdAt: response.body.user.createdAt,
+      updatedAt: response.body.user.updatedAt,
+      id: response.body.user.id
+    };
+    assert.deepStrictEqual(response.body.user, expectedUser);
   });
 
   it('PUT /user should return 422 for invalid inputs', async () => {
@@ -167,6 +157,27 @@ describe('Integration Tests: User', () => {
     assert.strictEqual(response.body.message, UNAUTHORIZED);
     const response2 = await request(app)
       .put('/user')
+      .set('Authorization', `Bearer invalid-token`)
+      .expect(401);
+    assert.strictEqual(response2.body.message, UNAUTHORIZED);
+  });
+
+  it('GET /user should return user profile', async () => {
+    const response = await request(app)
+      .get('/user')
+      .set('Authorization', `Bearer ${authToken}`)
+      .expect(200);
+
+    assert.deepStrictEqual(response.body.user, expectedUser);
+  });
+
+  it('GET /user should return 401 with invalid token', async () => {
+    const response = await request(app)
+      .get('/user')
+      .expect(401);
+    assert.strictEqual(response.body.message, UNAUTHORIZED);
+    const response2 = await request(app)
+      .get('/user')
       .set('Authorization', `Bearer invalid-token`)
       .expect(401);
     assert.strictEqual(response2.body.message, UNAUTHORIZED);

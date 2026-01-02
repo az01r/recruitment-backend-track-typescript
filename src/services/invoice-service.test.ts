@@ -1,31 +1,30 @@
 import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
-import { InvoiceService } from "./invoice-service.js";
-import { Prisma, InvoiceStatus, Currency } from '../generated/prisma/client.js';
+import InvoiceService from "./invoice-service.js";
+import { Prisma, InvoiceStatus, Currency, Invoice, TaxProfile } from '../generated/prisma/client.js';
 import ReqValidationError from "../types/request-validation-error.js";
-import { TaxProfileService } from "./tax-profile-service.js";
 import { INVOICE_NOT_FOUND, TAX_PROFILE_NOT_FOUND } from '../utils/constants.js';
+import InvoiceDAO from '../daos/invoice-dao.js';
+import { ReadUniqueTaxProfileDto } from '../types/tax-profile-dto.js';
+import { CreateInvoiceDto, ReadInvoiceOptionsDto, ReadUniqueInvoiceDto, ResponseInvoiceDTO, UpdateInvoiceDto } from '../types/invoice-dto.js';
+import TaxProfileDAO from '../daos/tax-profile-dao.js';
+
+mock.method(InvoiceDAO, 'createInvoice');
+mock.method(InvoiceDAO, 'findInvoices');
+mock.method(InvoiceDAO, 'findInvoice');
+mock.method(InvoiceDAO, 'updateInvoice');
+mock.method(InvoiceDAO, 'deleteInvoice');
+mock.method(TaxProfileDAO, 'findTaxProfile');
 
 describe('InvoiceService', () => {
-  let invoiceService: InvoiceService;
-  let taxProfileService: TaxProfileService;
-  let prismaMock: any;
 
   beforeEach(() => {
-    prismaMock = {
-      invoice: {
-        create: mock.fn(),
-        findMany: mock.fn(),
-        findUnique: mock.fn(),
-        update: mock.fn(),
-        delete: mock.fn(),
-      },
-      taxProfile: {
-        findUnique: mock.fn(),
-      },
-    };
-    taxProfileService = new TaxProfileService(prismaMock);
-    invoiceService = new InvoiceService(prismaMock, taxProfileService);
+    (InvoiceDAO.createInvoice as any).mock.resetCalls();
+    (InvoiceDAO.findInvoices as any).mock.resetCalls();
+    (InvoiceDAO.findInvoice as any).mock.resetCalls();
+    (InvoiceDAO.updateInvoice as any).mock.resetCalls();
+    (InvoiceDAO.deleteInvoice as any).mock.resetCalls();
+    (TaxProfileDAO.findTaxProfile as any).mock.resetCalls();
   });
 
   after(() => {
@@ -34,48 +33,55 @@ describe('InvoiceService', () => {
 
   describe('createInvoice', () => {
     it('should create a new invoice', async () => {
-      const data: Prisma.InvoiceCreateInput = {
-        taxProfile: {
-          connect: {
-            id: 'taxProfile123',
-            userId: 'user123'
-          }
-        },
-        amount: 1000,
-        status: InvoiceStatus.PENDING,
-        currency: Currency.EUR
+      const invoiceDto: CreateInvoiceDto = { taxProfileId: 'taxProfile123', userId: 'user123', amount: 1000, status: InvoiceStatus.PENDING, currency: Currency.EUR };
+      const taxProfileUniqueDto: ReadUniqueTaxProfileDto = { id: invoiceDto.taxProfileId, userId: invoiceDto.userId };
+      const prismaData: Prisma.InvoiceCreateInput = { amount: invoiceDto.amount, status: invoiceDto.status, currency: invoiceDto.currency, taxProfile: { connect: { id: invoiceDto.taxProfileId, userId: invoiceDto.userId } } };
+      const invoiceResponseDto: ResponseInvoiceDTO = { id: 'invoice123', taxProfileId: invoiceDto.taxProfileId, amount: invoiceDto.amount, status: invoiceDto.status, currency: invoiceDto.currency, createdAt: '2025-12-31T00:00:00.000Z', updatedAt: '2025-12-31T00:00:00.000Z' };
+      const taxProfile: TaxProfile = {
+        id: invoiceDto.taxProfileId,
+        createdAt: new Date('2025-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2025-01-01T00:00:00.000Z'),
+        legalName: 'legalName',
+        vatNumber: 'vatNumber',
+        address: 'address',
+        city: 'city',
+        zipCode: 'zipCode',
+        country: 'country',
+        userId: invoiceDto.userId,
       };
 
-      const createdInvoice = { id: 'invoice123', ...data, createdAt: new Date(), updatedAt: new Date() };
+      const prismaInvoice: Invoice = {
+        id: 'invoice123',
+        taxProfileId: invoiceDto.taxProfileId,
+        amount: invoiceDto.amount,
+        status: invoiceDto.status,
+        currency: invoiceDto.currency,
+        createdAt: new Date('2025-12-31T00:00:00.000Z'),
+        updatedAt: new Date('2025-12-31T00:00:00.000Z')
+      };
 
-      prismaMock.taxProfile.findUnique.mock.mockImplementationOnce(() => Promise.resolve({}));
-      prismaMock.invoice.create.mock.mockImplementationOnce(() => Promise.resolve(createdInvoice));
+      (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(taxProfile));
+      (InvoiceDAO.createInvoice as any).mock.mockImplementationOnce(() => Promise.resolve(prismaInvoice));
 
-      const result = await invoiceService.createInvoice(data);
+      const result = await InvoiceService.createInvoice(invoiceDto);
 
-      assert.deepStrictEqual(result, createdInvoice);
-      assert.strictEqual(prismaMock.taxProfile.findUnique.mock.callCount(), 1);
-      assert.strictEqual(prismaMock.invoice.create.mock.callCount(), 1);
+      const findTaxProfileCallArgs = (TaxProfileDAO.findTaxProfile as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(findTaxProfileCallArgs, [taxProfileUniqueDto]);
+      const createInvoiceCallArgs = (InvoiceDAO.createInvoice as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(createInvoiceCallArgs, [prismaData]);
+      assert.deepStrictEqual(result, invoiceResponseDto);
+      assert.strictEqual((TaxProfileDAO.findTaxProfile as any).mock.callCount(), 1);
+      assert.strictEqual((InvoiceDAO.createInvoice as any).mock.callCount(), 1);
     });
 
-    it('should throw error 404 if tax profile does not exist or does not belong to user', async () => {
-      const data: Prisma.InvoiceCreateInput = {
-        taxProfile: {
-          connect: {
-            id: 'notOwnedTaxProfileId',
-            userId: 'user123'
-          }
-        },
-        amount: 1000,
-        status: InvoiceStatus.PENDING,
-        currency: Currency.EUR
-      };
+    it('should throw 404 error if tax profile does not exists or does not belong to user', async () => {
+      const invoiceDto: CreateInvoiceDto = { taxProfileId: 'notOwnedTaxProfileId', userId: 'user123', amount: 1000, status: InvoiceStatus.PENDING, currency: Currency.EUR };
 
-      prismaMock.taxProfile.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
+      (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await assert.rejects(
         async () => {
-          await invoiceService.createInvoice(data);
+          await InvoiceService.createInvoice(invoiceDto);
         },
         (error: any) => {
           assert(error instanceof ReqValidationError);
@@ -84,168 +90,112 @@ describe('InvoiceService', () => {
           return true;
         }
       );
-      assert.strictEqual(prismaMock.taxProfile.findUnique.mock.callCount(), 1);
-      assert.strictEqual(prismaMock.invoice.create.mock.callCount(), 0);
+      assert.strictEqual((TaxProfileDAO.findTaxProfile as any).mock.callCount(), 1);
+      assert.strictEqual((InvoiceDAO.createInvoice as any).mock.callCount(), 0);
     });
   });
 
   describe('findInvoices', () => {
-    it('should find all invoices of an user', async () => {
-      const where: Prisma.InvoiceWhereInput = { taxProfile: { userId: 'user123' } };
-      const skip = 0;
-      const take = 10;
-      const invoices = [
-        { id: 'invoice1', taxProfileId: 'taxProfile123', amount: 1000, status: 'PENDING', currency: 'EUR', createdAt: new Date(), updatedAt: new Date() },
-        { id: 'invoice2', taxProfileId: 'taxProfile123', amount: 2000, status: 'PAID', currency: 'USD', createdAt: new Date(), updatedAt: new Date() }
+    it('should find invoices using filters', async () => {
+      const invoicesDto: ReadInvoiceOptionsDto = { userId: 'user123', taxProfileId: 'taxProfile123', amount: 1000, status: "PENDING", currency: "EUR", gteCreatedAt: "2025-12-31T00:00:00.000Z", lteCreatedAt: "2026-01-01T00:00:00.000Z", gteUpdatedAt: "2025-12-31T00:00:00.000Z", lteUpdatedAt: "2026-01-01T00:00:00.000Z", skip: 0, take: 10 };
+      const where: Prisma.InvoiceWhereInput = { taxProfile: { userId: invoicesDto.userId }, taxProfileId: invoicesDto.taxProfileId, amount: invoicesDto.amount, status: invoicesDto.status, currency: invoicesDto.currency, createdAt: { gte: invoicesDto.gteCreatedAt, lte: invoicesDto.lteCreatedAt }, updatedAt: { gte: invoicesDto.gteUpdatedAt, lte: invoicesDto.lteUpdatedAt } };
+      const prismaInvoices: Invoice[] = [
+        { id: 'invoice1', taxProfileId: 'taxProfile123', amount: 1000, status: 'PENDING', currency: 'EUR', createdAt: new Date('2025-12-31T00:00:00.000Z'), updatedAt: new Date('2025-12-31T00:00:00.000Z') },
+        { id: 'invoice2', taxProfileId: 'taxProfile123', amount: 2000, status: 'PAID', currency: 'USD', createdAt: new Date('2025-12-31T00:00:00.000Z'), updatedAt: new Date('2025-12-31T00:00:00.000Z') }
+      ];
+      const invoicesResponseDTO: ResponseInvoiceDTO[] = [
+        { id: 'invoice1', taxProfileId: 'taxProfile123', amount: 1000, status: 'PENDING', currency: 'EUR', createdAt: "2025-12-31T00:00:00.000Z", updatedAt: "2025-12-31T00:00:00.000Z" },
+        { id: 'invoice2', taxProfileId: 'taxProfile123', amount: 2000, status: 'PAID', currency: 'USD', createdAt: "2025-12-31T00:00:00.000Z", updatedAt: "2025-12-31T00:00:00.000Z" }
       ];
 
-      prismaMock.invoice.findMany.mock.mockImplementationOnce(() => Promise.resolve(invoices));
+      (InvoiceDAO.findInvoices as any).mock.mockImplementationOnce(() => Promise.resolve(prismaInvoices));
 
-      const result = await invoiceService.findInvoices(where, skip, take);
+      const result = await InvoiceService.findInvoices(invoicesDto);
 
-      const callArgs = prismaMock.invoice.findMany.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, {
-        skip,
-        take,
-        where,
-        orderBy: {
-          createdAt: 'desc'
-        }
-      });
-      assert.deepStrictEqual(result, invoices);
-      assert.strictEqual(prismaMock.invoice.findMany.mock.callCount(), 1);
-    });
-
-    it('should find all invoices of a user filtered by tax profile', async () => {
-      const where: Prisma.InvoiceWhereInput = { taxProfile: { id: 'taxProfile123', userId: 'user123' } };
-      const skip = 0;
-      const take = 10;
-      const invoices = [
-        { id: 'invoice1', taxProfileId: 'taxProfile123', amount: 1000, status: 'PENDING', currency: 'EUR', createdAt: new Date(), updatedAt: new Date() }
-      ];
-
-      prismaMock.invoice.findMany.mock.mockImplementationOnce(() => Promise.resolve(invoices));
-
-      const result = await invoiceService.findInvoices(where, skip, take);
-
-      const callArgs = prismaMock.invoice.findMany.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, {
-        skip,
-        take,
-        where,
-        orderBy: {
-          createdAt: 'desc'
-        }
-      });
-      assert.deepStrictEqual(result, invoices);
-      assert.strictEqual(prismaMock.invoice.findMany.mock.callCount(), 1);
-    });
-
-    it('should return empty array if no invoices are found', async () => {
-      const where: Prisma.InvoiceWhereInput = { taxProfile: { id: 'taxProfile123', userId: 'user123' } };
-      const skip = 0;
-      const take = 10;
-
-      prismaMock.invoice.findMany.mock.mockImplementationOnce(() => Promise.resolve([]));
-
-      const result = await invoiceService.findInvoices(where, skip, take);
-
-      const callArgs = prismaMock.invoice.findMany.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, {
-        skip,
-        take,
-        where,
-        orderBy: {
-          createdAt: 'desc'
-        }
-      });
-      assert.deepStrictEqual(result, []);
-      assert.strictEqual(prismaMock.invoice.findMany.mock.callCount(), 1);
+      const callArgs = (InvoiceDAO.findInvoices as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [where, invoicesDto.skip, invoicesDto.take]);
+      assert.deepStrictEqual(result, invoicesResponseDTO);
+      assert.strictEqual((InvoiceDAO.findInvoices as any).mock.callCount(), 1);
     });
   });
 
   describe('findInvoice', () => {
     it('should find an invoice by id and userId', async () => {
-      const userId = 'user123';
-      const invoiceId = 'invoice123';
-      const invoice = { id: invoiceId, taxProfileId: 'taxProfile123', amount: 1000, status: 'PENDING', currency: 'EUR', createdAt: new Date(), updatedAt: new Date() };
+      const invoiceDto: ReadUniqueInvoiceDto = { id: 'invoice123', userId: 'user123' };
+      const where: Prisma.InvoiceWhereUniqueInput = { id: invoiceDto.id, taxProfile: { userId: invoiceDto.userId } };
+      const prismaInvoice: Invoice = { id: invoiceDto.id, taxProfileId: 'taxProfile123', amount: 1000, status: 'PENDING', currency: 'EUR', createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
+      const invoiceResponseDTO: ResponseInvoiceDTO = {
+        id: prismaInvoice.id,
+        taxProfileId: prismaInvoice.taxProfileId,
+        amount: prismaInvoice.amount,
+        status: prismaInvoice.status,
+        currency: prismaInvoice.currency,
+        createdAt: prismaInvoice.createdAt.toISOString(),
+        updatedAt: prismaInvoice.updatedAt.toISOString()
+      };
 
-      prismaMock.invoice.findUnique.mock.mockImplementationOnce(() => Promise.resolve(invoice));
+      (InvoiceDAO.findInvoice as any).mock.mockImplementationOnce(() => Promise.resolve(prismaInvoice));
 
-      const result = await invoiceService.findInvoice({
-        id: invoiceId,
-        taxProfile: {
-          userId
-        }
-      });
+      const result = await InvoiceService.findInvoice(invoiceDto);
 
-      const callArgs = prismaMock.invoice.findUnique.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, {
-        where: {
-          id: invoiceId,
-          taxProfile: {
-            userId
-          }
-        }
-      });
-      assert.deepStrictEqual(result, invoice);
-      assert.strictEqual(prismaMock.invoice.findUnique.mock.callCount(), 1);
+      const callArgs = (InvoiceDAO.findInvoice as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [where]);
+      assert.deepStrictEqual(result, invoiceResponseDTO);
+      assert.strictEqual((InvoiceDAO.findInvoice as any).mock.callCount(), 1);
     });
 
-    it('should return null if no invoice is found', async () => {
-      const userId = 'user123';
-      const invoiceId = 'invoice123';
+    it('should throw 404 error if invoice does not exists or does not belong to user', async () => {
+      const invoiceDto: ReadUniqueInvoiceDto = { id: 'invoice123', userId: 'user123' };
+      const where: Prisma.InvoiceWhereUniqueInput = { id: invoiceDto.id, taxProfile: { userId: invoiceDto.userId } };
 
-      prismaMock.invoice.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
+      (InvoiceDAO.findInvoice as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
-      const result = await invoiceService.findInvoice({
-        id: invoiceId,
-        taxProfile: {
-          userId
+      await assert.rejects(
+        async () => {
+          await InvoiceService.findInvoice(invoiceDto);
+        },
+        (error: any) => {
+          assert(error instanceof ReqValidationError);
+          assert.strictEqual(error.message, INVOICE_NOT_FOUND);
+          assert.strictEqual(error.statusCode, 404);
+          return true;
         }
-      });
-
-      const callArgs = prismaMock.invoice.findUnique.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, {
-        where: {
-          id: invoiceId,
-          taxProfile: {
-            userId
-          }
-        }
-      });
-      assert.deepStrictEqual(result, null);
-      assert.strictEqual(prismaMock.invoice.findUnique.mock.callCount(), 1);
+      );
+      assert.strictEqual((InvoiceDAO.findInvoice as any).mock.callCount(), 1);
     });
   });
 
   describe('updateInvoice', () => {
     it('should update an invoice', async () => {
-      const where: Prisma.InvoiceWhereUniqueInput = { id: 'invoice123', taxProfile: { userId: 'user123' } };
-      const data: Prisma.InvoiceUpdateWithoutTaxProfileInput = { amount: 1500, status: 'PAID' };
-      const updatedInvoice = { id: 'invoice123', taxProfile: data };
+      const invoiceDto: UpdateInvoiceDto = { id: 'invoice123', userId: 'user123', amount: 1000, status: "PENDING", currency: "EUR" };
+      const readUniqueInvoiceDto: ReadUniqueInvoiceDto = { id: invoiceDto.id, userId: invoiceDto.userId };
+      const where: Prisma.InvoiceWhereInput = { id: readUniqueInvoiceDto.id, taxProfile: { userId: readUniqueInvoiceDto.userId } };
+      const dataToUpdate: Prisma.InvoiceUpdateWithoutTaxProfileInput = { amount: invoiceDto.amount, status: invoiceDto.status, currency: invoiceDto.currency };
+      const prismaInvoice: Invoice = { id: 'invoice123', taxProfileId: 'taxProfile123', amount: 1000, status: 'PENDING', currency: 'EUR', createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
+      const invoiceResponseDTO: ResponseInvoiceDTO = { id: prismaInvoice.id, taxProfileId: prismaInvoice.taxProfileId, amount: prismaInvoice.amount, status: prismaInvoice.status, currency: prismaInvoice.currency, createdAt: prismaInvoice.createdAt.toISOString(), updatedAt: prismaInvoice.updatedAt.toISOString() };
 
-      prismaMock.invoice.findUnique.mock.mockImplementationOnce(() => Promise.resolve({}));
-      prismaMock.invoice.update.mock.mockImplementationOnce(() => Promise.resolve(updatedInvoice));
+      (InvoiceDAO.findInvoice as any).mock.mockImplementationOnce(() => Promise.resolve(prismaInvoice));
+      (InvoiceDAO.updateInvoice as any).mock.mockImplementationOnce(() => Promise.resolve(prismaInvoice));
 
-      const result = await invoiceService.updateInvoice(where, data);
+      const result = await InvoiceService.updateInvoice(invoiceDto);
 
-      const updateCallArgs = prismaMock.invoice.update.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(updateCallArgs, { where, data });
-      assert.deepStrictEqual(result, updatedInvoice);
-      assert.strictEqual(prismaMock.invoice.findUnique.mock.callCount(), 1);
-      assert.strictEqual(prismaMock.invoice.update.mock.callCount(), 1);
+      const findCallArgs = (InvoiceDAO.findInvoice as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(findCallArgs, [where]);
+      const updateCallArgs = (InvoiceDAO.updateInvoice as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(updateCallArgs, [where, dataToUpdate]);
+      assert.deepStrictEqual(result, invoiceResponseDTO);
+      assert.strictEqual((InvoiceDAO.findInvoice as any).mock.callCount(), 1);
+      assert.strictEqual((InvoiceDAO.updateInvoice as any).mock.callCount(), 1);
     });
 
-    it('should throw error if invoice was not found or does not belong to user', async () => {
-      const where: Prisma.InvoiceWhereUniqueInput = { id: 'invoice123', taxProfile: { userId: 'user123' } };
-      const data: Prisma.InvoiceUpdateWithoutTaxProfileInput = { amount: 1500 };
+    it('should throw 404 error if invoice was not found or does not belong to user', async () => {
+      const invoiceDto: UpdateInvoiceDto = { id: 'invoice123', userId: 'user123', amount: 1000, status: "PENDING", currency: "EUR" };
 
-      prismaMock.invoice.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
+      (InvoiceDAO.findInvoice as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await assert.rejects(
         async () => {
-          await invoiceService.updateInvoice(where, data);
+          await InvoiceService.updateInvoice(invoiceDto);
         },
         (error: any) => {
           assert(error instanceof ReqValidationError);
@@ -254,36 +204,38 @@ describe('InvoiceService', () => {
           return true;
         }
       );
-      assert.strictEqual(prismaMock.invoice.findUnique.mock.callCount(), 1);
-      assert.strictEqual(prismaMock.invoice.update.mock.callCount(), 0);
+      assert.strictEqual((InvoiceDAO.findInvoice as any).mock.callCount(), 1);
+      assert.strictEqual((InvoiceDAO.updateInvoice as any).mock.callCount(), 0);
     });
   });
 
   describe('deleteInvoice', () => {
-    it('should delete an invoice', async () => {
-      const where: Prisma.InvoiceWhereUniqueInput = { id: 'invoice123', taxProfile: { userId: 'user123' } };
-      const deletedInvoice = where;
+    it('should delete an invoice using invoice id and user id', async () => {
+      const readUniqueInvoiceDto: ReadUniqueInvoiceDto = { id: 'invoice123', userId: 'user123' };
+      const prismaInvoice: Invoice = { id: 'invoice123', taxProfileId: 'taxProfile123', amount: 1000, status: 'PENDING', currency: 'EUR', createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
+      const where: Prisma.InvoiceWhereUniqueInput = { id: readUniqueInvoiceDto.id, taxProfile: { userId: readUniqueInvoiceDto.userId } };
 
-      prismaMock.invoice.findUnique.mock.mockImplementationOnce(() => Promise.resolve(deletedInvoice));
-      prismaMock.invoice.delete.mock.mockImplementationOnce(() => Promise.resolve(deletedInvoice));
+      (InvoiceDAO.findInvoice as any).mock.mockImplementationOnce(() => Promise.resolve(prismaInvoice));
+      (InvoiceDAO.deleteInvoice as any).mock.mockImplementationOnce(() => Promise.resolve(void 0));
 
-      const result = await invoiceService.deleteInvoice(where);
+      await InvoiceService.deleteInvoice(readUniqueInvoiceDto);
 
-      const deleteCallArgs = prismaMock.invoice.delete.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(deleteCallArgs, { where });
-      assert.deepStrictEqual(result, deletedInvoice);
-      assert.strictEqual(prismaMock.invoice.findUnique.mock.callCount(), 1);
-      assert.strictEqual(prismaMock.invoice.delete.mock.callCount(), 1);
+      const findCallArgs = (InvoiceDAO.findInvoice as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(findCallArgs, [where]);
+      const deleteCallArgs = (InvoiceDAO.deleteInvoice as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(deleteCallArgs, [where]);
+      assert.strictEqual((InvoiceDAO.findInvoice as any).mock.callCount(), 1);
+      assert.strictEqual((InvoiceDAO.deleteInvoice as any).mock.callCount(), 1);
     });
 
-    it('should throw error if invoice was not found or does not belong to user', async () => {
-      const where: Prisma.InvoiceWhereUniqueInput = { id: 'invoice123', taxProfile: { userId: 'user123' } };
+    it('should throw 404 error if invoice was not found or does not belong to user', async () => {
+      const readUniqueInvoiceDto: ReadUniqueInvoiceDto = { id: 'invoice123', userId: 'user123' };
 
-      prismaMock.invoice.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
+      (InvoiceDAO.findInvoice as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await assert.rejects(
         async () => {
-          await invoiceService.deleteInvoice(where);
+          await InvoiceService.deleteInvoice(readUniqueInvoiceDto);
         },
         (error: any) => {
           assert(error instanceof ReqValidationError);
@@ -292,8 +244,8 @@ describe('InvoiceService', () => {
           return true;
         }
       );
-      assert.strictEqual(prismaMock.invoice.findUnique.mock.callCount(), 1);
-      assert.strictEqual(prismaMock.invoice.delete.mock.callCount(), 0);
+      assert.strictEqual((InvoiceDAO.findInvoice as any).mock.callCount(), 1);
+      assert.strictEqual((InvoiceDAO.deleteInvoice as any).mock.callCount(), 0);
     });
   });
 });

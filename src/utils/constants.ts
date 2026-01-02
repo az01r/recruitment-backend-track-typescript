@@ -2,6 +2,7 @@ export const UNAUTHORIZED = 'Unauthorized';
 export const VALIDATION_ERROR = 'Validation error';
 
 export const SIGNED_UP = 'Signed up';
+export const LOGGED_IN = 'Logged in';
 export const USER_NOT_FOUND = 'User not found';
 export const USER_ALREADY_REGISTERED = 'User already registered';
 export const EMAIL_NOT_REGISTERED = 'E-Mail not registered yet';

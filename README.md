@@ -35,6 +35,7 @@ Swagger docs available at http://localhost:${process.env.BACKEND_PORT || 3000}/a
 ```
 src/
 ├── controllers/
+├── daos/
 ├── generated/
 ├── middlewares/
 ├── routers/

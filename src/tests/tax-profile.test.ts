@@ -4,6 +4,7 @@ import request from 'supertest';
 import app from '../index.js';
 import prisma from '../utils/prisma.js';
 import { TAX_PROFILE_DELETED, TAX_PROFILE_NOT_FOUND, UNAUTHORIZED, VALIDATION_ERROR } from '../utils/constants.js';
+import { CreateTaxProfileDTO } from '../types/tax-profile-dto.js';
 
 
 describe('Integration Tests: Tax Profile', () => {
@@ -19,7 +20,8 @@ describe('Integration Tests: Tax Profile', () => {
   let userId: string;
   let taxProfileId: string;
 
-  const testTaxProfile = {
+  const testTaxProfile: CreateTaxProfileDTO = {
+    userId: '',
     legalName: `Legal Name`,
     vatNumber: 'IT12345678901',
     address: 'Via Roma 1',
@@ -43,7 +45,8 @@ describe('Integration Tests: Tax Profile', () => {
         .get('/user')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
-      userId = userResponse.body.id;
+      userId = userResponse.body.user.id;
+      testTaxProfile.userId = userId;
     } catch (error) {
       console.error('Setup failed:', error);
     }
@@ -72,6 +75,8 @@ describe('Integration Tests: Tax Profile', () => {
       .expect(201);
 
     assert.ok(response.body.taxProfile);
+    console.log(response.body.taxProfile);
+    assert.strictEqual(response.body.taxProfile.userId, testTaxProfile.userId);
     assert.strictEqual(response.body.taxProfile.legalName, testTaxProfile.legalName);
     assert.strictEqual(response.body.taxProfile.vatNumber, testTaxProfile.vatNumber);
     assert.strictEqual(response.body.taxProfile.address, testTaxProfile.address);

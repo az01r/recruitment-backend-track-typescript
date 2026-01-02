@@ -147,6 +147,8 @@ const router = Router();
  *                     $ref: '#/components/schemas/TaxProfile'
  *       401:
  *         description: Unauthorized
+ *       422:
+ *         description: Validation error
  */
 router.get('/', isAuth, readManyValidation, validateRequest, TaxProfileController.getTaxProfiles);
 

@@ -1,56 +1,55 @@
 import type { Request, Response, NextFunction } from "express";
-import { Prisma } from "../generated/prisma/client.js";
 import TaxProfileService from "../services/tax-profile-service.js";
-import { TAX_PROFILE_DELETED, TAX_PROFILE_NOT_FOUND } from "../utils/constants.js";
+import { TAX_PROFILE_DELETED } from "../utils/constants.js";
+import { CreateTaxProfileDTO, ReadTaxProfileOptionsDto, ReadUniqueTaxProfileDto, UpdateTaxProfileDto } from "../types/tax-profile-dto.js";
 
 class TaxProfileController {
 
   createTaxProfile = async (req: Request, res: Response, _next: NextFunction) => {
     const { legalName, vatNumber, address, city, zipCode, country } = req.body;
-    const taxProfileData: Prisma.TaxProfileCreateInput = { legalName, vatNumber, address, city, zipCode, country, user: { connect: { id: req.userId! } } };
-    const taxProfile = await TaxProfileService.createTaxProfile(taxProfileData);
+    const taxProfileDto: CreateTaxProfileDTO = { userId: req.userId!, legalName, vatNumber, address, city, zipCode, country };
+    const taxProfile = await TaxProfileService.createTaxProfile(taxProfileDto);
     res.status(201).json({ taxProfile });
   }
 
   getTaxProfiles = async (req: Request, res: Response, _next: NextFunction) => {
     const { legalName, vatNumber, address, city, country, zipCode, gteCreatedAt, lteCreatedAt, gteUpdatedAt, lteUpdatedAt, skip, take } = req.query;
 
-    const where: Prisma.TaxProfileWhereInput = {};
+    const taxProfileDto: ReadTaxProfileOptionsDto = { userId: req.userId! };
 
-    where.userId = { equals: req.userId! };
-    if (legalName) where.legalName = { contains: String(legalName) };
-    if (vatNumber) where.vatNumber = { contains: String(vatNumber) };
-    if (address) where.address = { contains: String(address) };
-    if (city) where.city = { contains: String(city) };
-    if (country) where.country = { contains: String(country) };
-    if (zipCode) where.zipCode = { contains: String(zipCode) };
-    where.createdAt = { gte: gteCreatedAt ? gteCreatedAt as string : undefined, lte: lteCreatedAt ? lteCreatedAt as string : undefined };
-    where.updatedAt = { gte: gteUpdatedAt ? gteUpdatedAt as string : undefined, lte: lteUpdatedAt ? lteUpdatedAt as string : undefined };
-    const taxProfiles = await TaxProfileService.findTaxProfiles(where, skip ? Number(skip) : undefined, take ? Number(take) : undefined);
+    if (legalName) taxProfileDto.legalName = String(legalName);
+    if (vatNumber) taxProfileDto.vatNumber = String(vatNumber);
+    if (address) taxProfileDto.address = String(address);
+    if (city) taxProfileDto.city = String(city);
+    if (country) taxProfileDto.country = String(country);
+    if (zipCode) taxProfileDto.zipCode = String(zipCode);
+    if (gteCreatedAt) taxProfileDto.gteCreatedAt = String(gteCreatedAt);
+    if (lteCreatedAt) taxProfileDto.lteCreatedAt = String(lteCreatedAt);
+    if (gteUpdatedAt) taxProfileDto.gteUpdatedAt = String(gteUpdatedAt);
+    if (lteUpdatedAt) taxProfileDto.lteUpdatedAt = String(lteUpdatedAt);
+    if (skip) taxProfileDto.skip = Number(skip);
+    if (take) taxProfileDto.take = Number(take);
+
+    const taxProfiles = await TaxProfileService.findTaxProfiles(taxProfileDto);
     res.status(200).json({ taxProfiles });
   }
 
   getTaxProfile = async (req: Request, res: Response, _next: NextFunction) => {
-    const where: Prisma.TaxProfileWhereUniqueInput = { id: req.params.id, userId: req.userId! };
-    const taxProfile = await TaxProfileService.findTaxProfile(where);
-    if (!taxProfile) {
-      res.status(404);
-      throw new Error(TAX_PROFILE_NOT_FOUND);
-    }
+    const taxProfileDto: ReadUniqueTaxProfileDto = { id: req.params.id, userId: req.userId! };
+    const taxProfile = await TaxProfileService.findTaxProfile(taxProfileDto);
     res.status(200).json({ taxProfile });
   }
 
   updateTaxProfile = async (req: Request, res: Response, _next: NextFunction) => {
     const { legalName, vatNumber, address, city, zipCode, country } = req.body;
-    const data: Prisma.TaxProfileUpdateWithoutUserInput = { legalName, vatNumber, address, city, zipCode, country };
-    const where: Prisma.TaxProfileWhereUniqueInput = { id: req.params.id, userId: req.userId! };
-    const taxProfile = await TaxProfileService.updateTaxProfile(where, data);
+    const taxProfileDto: UpdateTaxProfileDto = { id: req.params.id, userId: req.userId!, legalName, vatNumber, address, city, zipCode, country };
+    const taxProfile = await TaxProfileService.updateTaxProfile(taxProfileDto);
     res.status(200).json({ taxProfile });
   }
 
   deleteTaxProfile = async (req: Request, res: Response, _next: NextFunction) => {
-    const where: Prisma.TaxProfileWhereUniqueInput = { id: req.params.id, userId: req.userId! };
-    await TaxProfileService.deleteTaxProfile(where);
+    const taxProfileDto: ReadUniqueTaxProfileDto = { id: req.params.id, userId: req.userId! };
+    await TaxProfileService.deleteTaxProfile(taxProfileDto);
     res.status(200).json({ message: TAX_PROFILE_DELETED });
   }
 }

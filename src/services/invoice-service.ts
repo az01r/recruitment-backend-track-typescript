@@ -1,67 +1,113 @@
-import prismaClientSingleton from "../utils/prisma.js";
-import { Prisma, PrismaClient } from "../generated/prisma/client.js";
+import { Prisma } from "../generated/prisma/client.js";
 import ReqValidationError from "../types/request-validation-error.js";
-import TaxProfileService, { TaxProfileService as TaxProfileServiceClass } from "./tax-profile-service.js";
-import { DEFAULT_SKIP, DEFAULT_TAKE, INVOICE_NOT_FOUND, TAX_PROFILE_NOT_FOUND } from "../utils/constants.js";
+import { DEFAULT_SKIP, DEFAULT_TAKE, INVOICE_NOT_FOUND } from "../utils/constants.js";
+import { CreateInvoiceDto, ReadInvoiceOptionsDto, ReadUniqueInvoiceDto, ResponseInvoiceDTO, UpdateInvoiceDto } from "../types/invoice-dto.js";
+import InvoiceDAO from "../daos/invoice-dao.js";
+import TaxProfileService from "./tax-profile-service.js";
 
 class InvoiceService {
-  private prismaClient: PrismaClient;
-  private taxProfileService: TaxProfileServiceClass;
 
-  constructor(prismaClient: PrismaClient = prismaClientSingleton, taxProfileService: TaxProfileServiceClass = TaxProfileService) {
-    this.prismaClient = prismaClient;
-    this.taxProfileService = taxProfileService;
+  createInvoice = async (invoiceDto: CreateInvoiceDto) => {
+    await TaxProfileService.findTaxProfile({ id: invoiceDto.taxProfileId, userId: invoiceDto.userId });
+    const prismaData: Prisma.InvoiceCreateInput = { amount: invoiceDto.amount, status: invoiceDto.status, currency: invoiceDto.currency, taxProfile: { connect: { id: invoiceDto.taxProfileId, userId: invoiceDto.userId } } };
+    const invoice = await InvoiceDAO.createInvoice(prismaData);
+    const invoiceResponseDto: ResponseInvoiceDTO = {
+      id: invoice.id,
+      taxProfileId: invoice.taxProfileId,
+      amount: invoice.amount,
+      status: invoice.status,
+      currency: invoice.currency,
+      createdAt: invoice.createdAt.toISOString(),
+      updatedAt: invoice.updatedAt.toISOString()
+    };
+    return invoiceResponseDto;
   }
 
-  createInvoice = async (data: Prisma.InvoiceCreateInput) => {
-    if (!data.taxProfile.connect) {
-      throw new ReqValidationError({ message: TAX_PROFILE_NOT_FOUND, statusCode: 404 });
-    }
-    await this.validateTaxProfileOwnership(data.taxProfile.connect);
-    return await this.prismaClient.invoice.create({ data });
-  }
-
-  findInvoices = async (where: Prisma.InvoiceWhereInput, skip?: number, take?: number) => {
-    return await this.prismaClient.invoice.findMany({
-      where,
-      skip: skip || DEFAULT_SKIP,
-      take: take || DEFAULT_TAKE,
-      orderBy: {
-        createdAt: 'desc'
+  findInvoices = async (invoicesDto: ReadInvoiceOptionsDto) => {
+    const where: Prisma.InvoiceWhereInput = {
+      taxProfile: {
+        userId: invoicesDto.userId
       }
-    });
+    };
+    if (invoicesDto.taxProfileId) where.taxProfileId = invoicesDto.taxProfileId;
+    if (invoicesDto.amount) where.amount = invoicesDto.amount;
+    if (invoicesDto.status) where.status = invoicesDto.status;
+    if (invoicesDto.currency) where.currency = invoicesDto.currency;
+
+    let createdAtWhere: Prisma.DateTimeFilter<"Invoice"> = {};
+    if (invoicesDto.gteCreatedAt) {
+      createdAtWhere.gte = invoicesDto.gteCreatedAt;
+    }
+    if (invoicesDto.lteCreatedAt) {
+      createdAtWhere.lte = invoicesDto.lteCreatedAt;
+    }
+    if (invoicesDto.gteCreatedAt || invoicesDto.lteCreatedAt) {
+      where.createdAt = createdAtWhere;
+    }
+
+    let updatedAtWhere: Prisma.DateTimeFilter<"Invoice"> = {};
+    if (invoicesDto.gteUpdatedAt) {
+      updatedAtWhere.gte = invoicesDto.gteUpdatedAt;
+    }
+    if (invoicesDto.lteUpdatedAt) {
+      updatedAtWhere.lte = invoicesDto.lteUpdatedAt;
+    }
+    if (invoicesDto.gteUpdatedAt || invoicesDto.lteUpdatedAt) {
+      where.updatedAt = updatedAtWhere;
+    }
+    const invoices = await InvoiceDAO.findInvoices(where, invoicesDto.skip || DEFAULT_SKIP, invoicesDto.take || DEFAULT_TAKE);
+    const invoicesResponseDTO: ResponseInvoiceDTO[] = invoices.map(invoice => ({
+      id: invoice.id,
+      taxProfileId: invoice.taxProfileId,
+      amount: invoice.amount,
+      status: invoice.status,
+      currency: invoice.currency,
+      createdAt: invoice.createdAt.toISOString(),
+      updatedAt: invoice.updatedAt.toISOString()
+    }));
+    return invoicesResponseDTO;
   }
 
-  findInvoice = async (where: Prisma.InvoiceWhereUniqueInput) => {
-    return await this.prismaClient.invoice.findUnique({ where });
-  }
-
-  updateInvoice = async (where: Prisma.InvoiceWhereUniqueInput, data: Prisma.InvoiceUpdateWithoutTaxProfileInput) => {
-    await this.validateInvoiceOwnership(where);
-    return await this.prismaClient.invoice.update({ where, data });
-  }
-
-  deleteInvoice = async (where: Prisma.InvoiceWhereUniqueInput) => {
-    await this.validateInvoiceOwnership(where);
-    return await this.prismaClient.invoice.delete({ where });
-  }
-
-  private validateInvoiceOwnership = async (where: Prisma.InvoiceWhereUniqueInput) => {
-    const invoice = await this.prismaClient.invoice.findUnique({ where });
-
+  findInvoice = async (invoiceDto: ReadUniqueInvoiceDto) => {
+    const where: Prisma.InvoiceWhereUniqueInput = { id: invoiceDto.id, taxProfile: { userId: invoiceDto.userId } };
+    const invoice = await InvoiceDAO.findInvoice(where);
     if (!invoice) {
       throw new ReqValidationError({ message: INVOICE_NOT_FOUND, statusCode: 404 });
     }
+    const invoiceResponseDTO: ResponseInvoiceDTO = {
+      id: invoice.id,
+      taxProfileId: invoice.taxProfileId,
+      amount: invoice.amount,
+      status: invoice.status,
+      currency: invoice.currency,
+      createdAt: invoice.createdAt.toISOString(),
+      updatedAt: invoice.updatedAt.toISOString()
+    };
+    return invoiceResponseDTO;
   }
 
-  private validateTaxProfileOwnership = async (where: Prisma.TaxProfileWhereUniqueInput) => {
-    const taxProfile = await this.taxProfileService.findTaxProfile(where);
+  updateInvoice = async (invoiceDto: UpdateInvoiceDto) => {
+    await this.findInvoice(invoiceDto);
+    const where: Prisma.InvoiceWhereUniqueInput = { id: invoiceDto.id, taxProfile: { userId: invoiceDto.userId } };
+    const dataToUpdate: Prisma.InvoiceUpdateWithoutTaxProfileInput = { amount: invoiceDto.amount, status: invoiceDto.status, currency: invoiceDto.currency };
+    const invoice = await InvoiceDAO.updateInvoice(where, dataToUpdate);
+    const invoiceResponseDTO: ResponseInvoiceDTO = {
+      id: invoice.id,
+      taxProfileId: invoice.taxProfileId,
+      amount: invoice.amount,
+      status: invoice.status,
+      currency: invoice.currency,
+      createdAt: invoice.createdAt.toISOString(),
+      updatedAt: invoice.updatedAt.toISOString()
+    };
+    return invoiceResponseDTO;
+  }
 
-    if (!taxProfile) {
-      throw new ReqValidationError({ message: TAX_PROFILE_NOT_FOUND, statusCode: 404 });
-    }
+  deleteInvoice = async (invoiceDto: ReadUniqueInvoiceDto) => {
+    await this.findInvoice(invoiceDto);
+    const where: Prisma.InvoiceWhereUniqueInput = { id: invoiceDto.id, taxProfile: { userId: invoiceDto.userId } };
+    await InvoiceDAO.deleteInvoice(where);
   }
 }
 
 export default new InvoiceService();
-export { InvoiceService };

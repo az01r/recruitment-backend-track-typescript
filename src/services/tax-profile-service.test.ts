@@ -1,25 +1,25 @@
 import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
-import { TaxProfileService } from "./tax-profile-service.js";
-import { Prisma } from '../generated/prisma/client.js';
+import TaxProfileService from "./tax-profile-service.js";
+import { Prisma, TaxProfile } from '../generated/prisma/client.js';
 import ReqValidationError from '../types/request-validation-error.js';
 import { TAX_PROFILE_NOT_FOUND } from '../utils/constants.js';
+import TaxProfileDAO from '../daos/tax-profile-dao.js';
+import { CreateTaxProfileDTO, ReadTaxProfileOptionsDto, ReadUniqueTaxProfileDto, TaxProfileResponseDTO, UpdateTaxProfileDto } from '../types/tax-profile-dto.js';
+
+mock.method(TaxProfileDAO, 'createTaxProfile');
+mock.method(TaxProfileDAO, 'findTaxProfiles');
+mock.method(TaxProfileDAO, 'findTaxProfile');
+mock.method(TaxProfileDAO, 'updateTaxProfile');
+mock.method(TaxProfileDAO, 'deleteTaxProfile');
 
 describe('TaxProfileService', () => {
-  let taxProfileService: TaxProfileService;
-  let prismaMock: any;
-
   beforeEach(() => {
-    prismaMock = {
-      taxProfile: {
-        create: mock.fn(),
-        findMany: mock.fn(),
-        findUnique: mock.fn(),
-        update: mock.fn(),
-        delete: mock.fn(),
-      },
-    };
-    taxProfileService = new TaxProfileService(prismaMock);
+    (TaxProfileDAO.createTaxProfile as any).mock.resetCalls();
+    (TaxProfileDAO.findTaxProfiles as any).mock.resetCalls();
+    (TaxProfileDAO.findTaxProfile as any).mock.resetCalls();
+    (TaxProfileDAO.updateTaxProfile as any).mock.resetCalls();
+    (TaxProfileDAO.deleteTaxProfile as any).mock.resetCalls();
   });
 
   after(() => {
@@ -28,110 +28,125 @@ describe('TaxProfileService', () => {
 
   describe('createTaxProfile', () => {
     it('should create a new tax profile', async () => {
-      const data: Prisma.TaxProfileCreateInput = { user: { connect: { id: '1' } }, legalName: 'Test Legal Name', vatNumber: 'IT1234567890', address: 'Test Address', city: 'Test City', zipCode: '12345', country: 'Test Country' };
-      const expectedResult = { id: '1', createdAt: new Date(), updatedAt: new Date(), ...data };
+      const taxProfileDto: CreateTaxProfileDTO = { userId: '1', legalName: 'Legal Name', vatNumber: 'VAT Number', address: 'Address', city: 'City', zipCode: '12345', country: 'Country' };
+      const taxProfileData: Prisma.TaxProfileCreateInput = { user: { connect: { id: taxProfileDto.userId } }, legalName: taxProfileDto.legalName, vatNumber: taxProfileDto.vatNumber, address: taxProfileDto.address, city: taxProfileDto.city, zipCode: taxProfileDto.zipCode, country: taxProfileDto.country };
+      const prismaTaxProfile: TaxProfile = { ...taxProfileDto, id: '1', createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
+      const taxProfileResponseDTO: TaxProfileResponseDTO = { ...taxProfileDto, id: '1', createdAt: prismaTaxProfile.createdAt.toISOString(), updatedAt: prismaTaxProfile.updatedAt.toISOString() };
 
-      prismaMock.taxProfile.create.mock.mockImplementationOnce(() => Promise.resolve(expectedResult));
+      (TaxProfileDAO.createTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(prismaTaxProfile));
 
-      const result = await taxProfileService.createTaxProfile(data);
+      const result = await TaxProfileService.createTaxProfile(taxProfileDto);
 
-      const callArgs = prismaMock.taxProfile.create.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, { data });
-      assert.deepStrictEqual(result, expectedResult);
-      assert.strictEqual(prismaMock.taxProfile.create.mock.callCount(), 1);
+      const callArgs = (TaxProfileDAO.createTaxProfile as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [taxProfileData]);
+      assert.deepStrictEqual(result, taxProfileResponseDTO);
+      assert.strictEqual((TaxProfileDAO.createTaxProfile as any).mock.callCount(), 1);
     });
   });
 
   describe('findTaxProfiles', () => {
-    it('should find all tax profiles of an user', async () => {
-      const skip = 0;
-      const take = 10;
-      const orderBy = { createdAt: 'desc' };
-      const where: Prisma.TaxProfileWhereInput = { userId: '1' };
+    it('should find tax profiles using filters', async () => {
+      const skip = 10;
+      const take = 20;
+      const userId = '1';
+      const readTaxProfileOptionsDto: ReadTaxProfileOptionsDto = { userId, legalName: 'Legal Name', vatNumber: 'VAT Number', address: 'Address', city: 'City', country: 'Country', zipCode: '12345', gteCreatedAt: '2025-01-01T00:00:00.000Z', lteCreatedAt: '2025-12-31T00:00:00.000Z', gteUpdatedAt: '2025-01-01T00:00:00.000Z', lteUpdatedAt: '2025-12-31T00:00:00.000Z', skip, take };
+      const where: Prisma.TaxProfileWhereInput = {
+        userId: readTaxProfileOptionsDto.userId,
+        legalName: { contains: readTaxProfileOptionsDto.legalName },
+        vatNumber: { contains: readTaxProfileOptionsDto.vatNumber },
+        address: { contains: readTaxProfileOptionsDto.address },
+        city: { contains: readTaxProfileOptionsDto.city },
+        country: { contains: readTaxProfileOptionsDto.country },
+        zipCode: { contains: readTaxProfileOptionsDto.zipCode },
+        createdAt: { gte: readTaxProfileOptionsDto.gteCreatedAt, lte: readTaxProfileOptionsDto.lteCreatedAt },
+        updatedAt: { gte: readTaxProfileOptionsDto.gteUpdatedAt, lte: readTaxProfileOptionsDto.lteUpdatedAt },
+      };
+      const prismaTaxProfiles: TaxProfile[] = [
+        { id: '1', legalName: readTaxProfileOptionsDto.legalName!, vatNumber: readTaxProfileOptionsDto.vatNumber!, address: readTaxProfileOptionsDto.address!, city: readTaxProfileOptionsDto.city!, zipCode: readTaxProfileOptionsDto.zipCode!, country: readTaxProfileOptionsDto.country!, createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z'), userId },
+        { id: '2', legalName: readTaxProfileOptionsDto.legalName!, vatNumber: readTaxProfileOptionsDto.vatNumber!, address: readTaxProfileOptionsDto.address!, city: readTaxProfileOptionsDto.city!, zipCode: readTaxProfileOptionsDto.zipCode!, country: readTaxProfileOptionsDto.country!, createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z'), userId },
+      ];
+      const taxProfilesResponseDTO: TaxProfileResponseDTO[] = [
+        { id: '1', legalName: readTaxProfileOptionsDto.legalName!, vatNumber: readTaxProfileOptionsDto.vatNumber!, address: readTaxProfileOptionsDto.address!, city: readTaxProfileOptionsDto.city!, zipCode: readTaxProfileOptionsDto.zipCode!, country: readTaxProfileOptionsDto.country!, createdAt: new Date('2025-01-01T00:00:00.000Z').toISOString(), updatedAt: new Date('2025-01-01T00:00:00.000Z').toISOString(), userId },
+        { id: '2', legalName: readTaxProfileOptionsDto.legalName!, vatNumber: readTaxProfileOptionsDto.vatNumber!, address: readTaxProfileOptionsDto.address!, city: readTaxProfileOptionsDto.city!, zipCode: readTaxProfileOptionsDto.zipCode!, country: readTaxProfileOptionsDto.country!, createdAt: new Date('2025-01-01T00:00:00.000Z').toISOString(), updatedAt: new Date('2025-01-01T00:00:00.000Z').toISOString(), userId },
+      ];
 
-      const taxProfiles = [{ user: { connect: { id: '1' } }, id: '1', legalName: 'Test Legal Name', vatNumber: 'IT1234567890', address: 'Test Address', city: 'Test City', zipCode: '12345', country: 'Test Country', createdAt: new Date(), updatedAt: new Date() }];
-      prismaMock.taxProfile.findMany.mock.mockImplementationOnce(() => Promise.resolve(taxProfiles));
+      (TaxProfileDAO.findTaxProfiles as any).mock.mockImplementationOnce(() => Promise.resolve(prismaTaxProfiles));
 
-      const result = await taxProfileService.findTaxProfiles(where, skip, take);
+      const result = await TaxProfileService.findTaxProfiles(readTaxProfileOptionsDto);
 
-      const callArgs = prismaMock.taxProfile.findMany.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, { where, skip, take, orderBy });
-      assert.deepStrictEqual(result, taxProfiles);
-      assert.strictEqual(prismaMock.taxProfile.findMany.mock.callCount(), 1);
-    });
-
-    it('should return empty array if no tax profile was found', async () => {
-      const skip = 0;
-      const take = 10;
-      const orderBy = { createdAt: 'desc' };
-      const where: Prisma.TaxProfileWhereInput = { userId: '1' };
-
-      prismaMock.taxProfile.findMany.mock.mockImplementationOnce(() => Promise.resolve([]));
-
-      const result = await taxProfileService.findTaxProfiles(where, skip, take);
-
-      const callArgs = prismaMock.taxProfile.findMany.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, { where, skip, take, orderBy });
-      assert.deepStrictEqual(result, []);
-      assert.strictEqual(prismaMock.taxProfile.findMany.mock.callCount(), 1);
+      const callArgs = (TaxProfileDAO.findTaxProfiles as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [where, skip, take]);
+      assert.deepStrictEqual(result, taxProfilesResponseDTO);
+      assert.strictEqual((TaxProfileDAO.findTaxProfiles as any).mock.callCount(), 1);
     });
   });
 
   describe('findTaxProfile', () => {
-    it('should find a tax profile by taxProfileId and userId', async () => {
-      const where: Prisma.TaxProfileWhereUniqueInput = { id: '1', userId: '1' };
-      const taxProfile = { user: { connect: { id: '1' } }, id: '1', legalName: 'Test Legal Name', vatNumber: 'IT1234567890', address: 'Test Address', city: 'Test City', zipCode: '12345', country: 'Test Country', createdAt: new Date(), updatedAt: new Date() };
+    it('should find a tax profile using taxProfileId and userId', async () => {
+      const taxProfileDto: ReadUniqueTaxProfileDto = { id: '1', userId: '1' };
+      const where: Prisma.TaxProfileWhereUniqueInput = { id: taxProfileDto.id, userId: taxProfileDto.userId };
+      const prismaTaxProfile: TaxProfile = { id: taxProfileDto.id, legalName: 'Legal Name', vatNumber: 'VAT Number', address: 'Address', city: 'City', zipCode: '12345', country: 'Country', createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z'), userId: taxProfileDto.userId };
+      const taxProfileResponseDTO: TaxProfileResponseDTO = { ...prismaTaxProfile, createdAt: prismaTaxProfile.createdAt.toISOString(), updatedAt: prismaTaxProfile.updatedAt.toISOString() };
 
-      prismaMock.taxProfile.findUnique.mock.mockImplementationOnce(() => Promise.resolve(taxProfile));
+      (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(prismaTaxProfile));
 
-      const result = await taxProfileService.findTaxProfile(where);
+      const result = await TaxProfileService.findTaxProfile(taxProfileDto);
 
-      const callArgs = prismaMock.taxProfile.findUnique.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, { where });
-      assert.deepStrictEqual(result, taxProfile);
-      assert.strictEqual(prismaMock.taxProfile.findUnique.mock.callCount(), 1);
+      const callArgs = (TaxProfileDAO.findTaxProfile as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(callArgs, [where]);
+      assert.deepStrictEqual(result, taxProfileResponseDTO);
+      assert.strictEqual((TaxProfileDAO.findTaxProfile as any).mock.callCount(), 1);
     });
 
-    it('should return null if no tax profile was found', async () => {
-      const where: Prisma.TaxProfileWhereUniqueInput = { id: '1', userId: '1' };
+    it('should throw 404 error if no tax profile was found', async () => {
+      const taxProfileDto: ReadUniqueTaxProfileDto = { id: '1', userId: '1' };
 
-      prismaMock.taxProfile.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
+      (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
-      const result = await taxProfileService.findTaxProfile(where);
-
-      const callArgs = prismaMock.taxProfile.findUnique.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, { where });
-      assert.deepStrictEqual(result, null);
-      assert.strictEqual(prismaMock.taxProfile.findUnique.mock.callCount(), 1);
+      await assert.rejects(
+        async () => {
+          await TaxProfileService.findTaxProfile(taxProfileDto);
+        },
+        (error: any) => {
+          assert(error instanceof ReqValidationError);
+          assert.strictEqual(error.message, TAX_PROFILE_NOT_FOUND);
+          assert.strictEqual(error.statusCode, 404);
+          return true;
+        }
+      );
     });
   });
 
   describe('updateTaxProfile', () => {
     it('should update a tax profile', async () => {
-      const where: Prisma.TaxProfileWhereUniqueInput = { id: '1', userId: '1' };
-      const data: Prisma.TaxProfileUpdateWithoutUserInput = { legalName: 'Updated Legal Name' };
+      const taxProfileDto: UpdateTaxProfileDto = { id: '1', userId: '1', legalName: 'updatedLegalName', vatNumber: 'updatedVatNumber', address: 'updatedAddress', city: 'updatedCity', zipCode: 'updatedZipCode', country: 'updatedCountry' };
+      const prismaTaxProfile: TaxProfile = { id: taxProfileDto.id, userId: taxProfileDto.userId, legalName: taxProfileDto.legalName!, vatNumber: taxProfileDto.vatNumber!, address: taxProfileDto.address!, city: taxProfileDto.city!, zipCode: taxProfileDto.zipCode!, country: taxProfileDto.country!, createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
+      const where: Prisma.TaxProfileWhereUniqueInput = { id: taxProfileDto.id, userId: taxProfileDto.userId };
+      const data: Prisma.TaxProfileUpdateWithoutUserInput = { legalName: taxProfileDto.legalName, vatNumber: taxProfileDto.vatNumber, address: taxProfileDto.address, city: taxProfileDto.city, zipCode: taxProfileDto.zipCode, country: taxProfileDto.country };
+      const taxProfileResponseDTO: TaxProfileResponseDTO = { id: prismaTaxProfile.id, legalName: prismaTaxProfile.legalName!, vatNumber: prismaTaxProfile.vatNumber!, address: prismaTaxProfile.address!, city: prismaTaxProfile.city!, zipCode: prismaTaxProfile.zipCode!, country: prismaTaxProfile.country!, createdAt: prismaTaxProfile.createdAt.toISOString(), updatedAt: prismaTaxProfile.updatedAt.toISOString(), userId: prismaTaxProfile.userId };
 
-      const updatedTaxProfile = { user: { connect: { id: '1' } }, id: '1', legalName: 'Updated Legal Name', vatNumber: 'IT1234567890', address: 'Test Address', city: 'Test City', zipCode: '12345', country: 'Test Country', createdAt: new Date(), updatedAt: new Date() };
-      prismaMock.taxProfile.findUnique.mock.mockImplementationOnce(() => Promise.resolve(updatedTaxProfile));
-      prismaMock.taxProfile.update.mock.mockImplementationOnce(() => Promise.resolve(updatedTaxProfile));
+      (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(prismaTaxProfile));
+      (TaxProfileDAO.updateTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(prismaTaxProfile));
 
-      const result = await taxProfileService.updateTaxProfile(where, data);
+      const result = await TaxProfileService.updateTaxProfile(taxProfileDto);
 
-      const callArgs = prismaMock.taxProfile.update.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, { where, data });
-      assert.deepStrictEqual(result, updatedTaxProfile);
-      assert.strictEqual(prismaMock.taxProfile.update.mock.callCount(), 1);
+      const findCallArgs = (TaxProfileDAO.findTaxProfile as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(findCallArgs, [where]);
+      const updateCallArgs = (TaxProfileDAO.updateTaxProfile as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(updateCallArgs, [where, data]);
+      assert.deepStrictEqual(result, taxProfileResponseDTO);
+      assert.strictEqual((TaxProfileDAO.updateTaxProfile as any).mock.callCount(), 1);
+      assert.strictEqual((TaxProfileDAO.findTaxProfile as any).mock.callCount(), 1);
     });
 
     it('should throw error 404 if tax profile was not found or does not belong to user', async () => {
-      const where: Prisma.TaxProfileWhereUniqueInput = { id: 'notFound', userId: '1' };
-      const data: Prisma.TaxProfileUpdateWithoutUserInput = { legalName: 'Updated Legal Name' };
+      const taxProfileDto: ReadUniqueTaxProfileDto = { id: '1', userId: '1' };
 
-      prismaMock.taxProfile.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
+      (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await assert.rejects(
         async () => {
-          await taxProfileService.updateTaxProfile(where, data);
+          await TaxProfileService.updateTaxProfile(taxProfileDto);
         },
         (error: any) => {
           assert(error instanceof ReqValidationError);
@@ -140,35 +155,37 @@ describe('TaxProfileService', () => {
           return true;
         }
       );
-      assert.strictEqual(prismaMock.taxProfile.findUnique.mock.callCount(), 1);
-      assert.strictEqual(prismaMock.taxProfile.update.mock.callCount(), 0);
+      assert.strictEqual((TaxProfileDAO.findTaxProfile as any).mock.callCount(), 1);
+      assert.strictEqual((TaxProfileDAO.updateTaxProfile as any).mock.callCount(), 0);
     });
   });
 
   describe('deleteTaxProfile', () => {
     it('should delete a tax profile', async () => {
-      const where: Prisma.TaxProfileWhereUniqueInput = { id: '1', userId: '1' };
+      const taxProfileDto: ReadUniqueTaxProfileDto = { id: '1', userId: '1', };
+      const prismaTaxProfile: TaxProfile = { id: taxProfileDto.id, userId: taxProfileDto.userId, legalName: 'Legal Name', vatNumber: 'Vat Number', address: 'Address', city: 'City', zipCode: 'Zip Code', country: 'Country', createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
+      const where: Prisma.TaxProfileWhereUniqueInput = { id: taxProfileDto.id, userId: taxProfileDto.userId };
 
-      const deletedTaxProfile = { user: { connect: { id: '1' } }, id: '1', legalName: 'Test Legal Name', vatNumber: 'IT1234567890', address: 'Test Address', city: 'Test City', zipCode: '12345', country: 'Test Country', createdAt: new Date(), updatedAt: new Date() };
-      prismaMock.taxProfile.findUnique.mock.mockImplementationOnce(() => Promise.resolve(deletedTaxProfile));
-      prismaMock.taxProfile.delete.mock.mockImplementationOnce(() => Promise.resolve(deletedTaxProfile));
+      (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(prismaTaxProfile));
+      (TaxProfileDAO.deleteTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(prismaTaxProfile));
 
-      const result = await taxProfileService.deleteTaxProfile(where);
+      await TaxProfileService.deleteTaxProfile(taxProfileDto);
 
-      const callArgs = prismaMock.taxProfile.delete.mock.calls[0].arguments[0];
-      assert.deepStrictEqual(callArgs, { where });
-      assert.deepStrictEqual(result, deletedTaxProfile);
-      assert.strictEqual(prismaMock.taxProfile.delete.mock.callCount(), 1);
+      const findCallArgs = (TaxProfileDAO.findTaxProfile as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(findCallArgs, [where]);
+      const deleteCallArgs = (TaxProfileDAO.deleteTaxProfile as any).mock.calls[0].arguments;
+      assert.deepStrictEqual(deleteCallArgs, [where]);
+      assert.strictEqual((TaxProfileDAO.deleteTaxProfile as any).mock.callCount(), 1);
     });
 
     it('should throw error 404 if tax profile was not found or does not belong to user', async () => {
-      const where: Prisma.TaxProfileWhereUniqueInput = { id: 'notFound', userId: '1' };
+      const taxProfileDto: ReadUniqueTaxProfileDto = { id: '1', userId: '1' };
 
-      prismaMock.taxProfile.findUnique.mock.mockImplementationOnce(() => Promise.resolve(null));
+      (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(null));
 
       await assert.rejects(
         async () => {
-          await taxProfileService.deleteTaxProfile(where);
+          await TaxProfileService.deleteTaxProfile(taxProfileDto);
         },
         (error: any) => {
           assert(error instanceof ReqValidationError);
@@ -177,8 +194,8 @@ describe('TaxProfileService', () => {
           return true;
         }
       );
-      assert.strictEqual(prismaMock.taxProfile.findUnique.mock.callCount(), 1);
-      assert.strictEqual(prismaMock.taxProfile.delete.mock.callCount(), 0);
+      assert.strictEqual((TaxProfileDAO.findTaxProfile as any).mock.callCount(), 1);
+      assert.strictEqual((TaxProfileDAO.deleteTaxProfile as any).mock.callCount(), 0);
     });
   });
 });

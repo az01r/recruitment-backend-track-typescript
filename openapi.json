@@ -47,7 +47,7 @@
           },
           "status": {
             "type": "string",
-            "description": "The invoice status. Possible values [ PAID, PENDING, FAILED ]"
+            "description": "The invoice status. Possible values [ PAID, PENDING, CANCELLED ]"
           },
           "currency": {
             "type": "string",
@@ -224,7 +224,7 @@
               "enum": [
                 "PAID",
                 "PENDING",
-                "FAILED"
+                "CANCELLED"
               ]
             },
             "required": false,
@@ -306,6 +306,9 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "422": {
+            "description": "Validation error"
           }
         }
       },
@@ -346,7 +349,7 @@
                     "enum": [
                       "PAID",
                       "PENDING",
-                      "FAILED"
+                      "CANCELLED"
                     ]
                   },
                   "currency": {
@@ -476,7 +479,7 @@
                     "enum": [
                       "PAID",
                       "PENDING",
-                      "FAILED"
+                      "CANCELLED"
                     ]
                   },
                   "currency": {
@@ -705,6 +708,9 @@
           },
           "401": {
             "description": "Unauthorized"
+          },
+          "422": {
+            "description": "Validation error"
           }
         }
       },
@@ -1100,7 +1106,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
                 }
               }
             }
@@ -1162,7 +1173,12 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
                 }
               }
             }
