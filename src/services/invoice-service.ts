@@ -1,5 +1,5 @@
 import { Prisma } from "../generated/prisma/client.js";
-import ReqValidationError from "../types/request-validation-error.js";
+import { ResourceNotFoundError } from "../types/error.js";
 import { DEFAULT_SKIP, DEFAULT_TAKE, INVOICE_NOT_FOUND } from "../utils/constants.js";
 import { CreateInvoiceDto, ReadInvoiceOptionsDto, ReadUniqueInvoiceDto, ResponseInvoiceDTO, UpdateInvoiceDto } from "../types/invoice-dto.js";
 import InvoiceDAO from "../daos/invoice-dao.js";
@@ -72,7 +72,7 @@ class InvoiceService {
     const where: Prisma.InvoiceWhereUniqueInput = { id: invoiceDto.id, taxProfile: { userId: invoiceDto.userId } };
     const invoice = await InvoiceDAO.findInvoice(where);
     if (!invoice) {
-      throw new ReqValidationError({ message: INVOICE_NOT_FOUND, statusCode: 404 });
+      throw new ResourceNotFoundError(INVOICE_NOT_FOUND);
     }
     const invoiceResponseDTO: ResponseInvoiceDTO = {
       id: invoice.id,

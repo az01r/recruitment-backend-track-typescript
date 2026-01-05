@@ -5,9 +5,8 @@ export const SIGNED_UP = 'Signed up';
 export const LOGGED_IN = 'Logged in';
 export const USER_NOT_FOUND = 'User not found';
 export const USER_ALREADY_REGISTERED = 'User already registered';
-export const EMAIL_NOT_REGISTERED = 'E-Mail not registered yet';
+export const INVALID_EMAIL_OR_PASSWORD = 'Invalid email or password';
 export const INVALID_EMAIL = 'Please enter a valid email';
-export const WRONG_PASSWORD = 'Password is incorrect';
 export const USER_DELETED = 'User deleted';
 
 export const TAX_PROFILE_NOT_FOUND = 'Tax profile does not exist or does not belong to user';

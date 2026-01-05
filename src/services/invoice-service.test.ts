@@ -2,7 +2,7 @@ import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import InvoiceService from "./invoice-service.js";
 import { Prisma, InvoiceStatus, Currency, Invoice, TaxProfile } from '../generated/prisma/client.js';
-import ReqValidationError from "../types/request-validation-error.js";
+import { ResourceNotFoundError } from '../types/error.js';
 import { INVOICE_NOT_FOUND, TAX_PROFILE_NOT_FOUND } from '../utils/constants.js';
 import InvoiceDAO from '../daos/invoice-dao.js';
 import { ReadUniqueTaxProfileDto } from '../types/tax-profile-dto.js';
@@ -74,7 +74,7 @@ describe('InvoiceService', () => {
       assert.strictEqual((InvoiceDAO.createInvoice as any).mock.callCount(), 1);
     });
 
-    it('should throw 404 error if tax profile does not exists or does not belong to user', async () => {
+    it('should throw error if tax profile does not exists or does not belong to user', async () => {
       const invoiceDto: CreateInvoiceDto = { taxProfileId: 'notOwnedTaxProfileId', userId: 'user123', amount: 1000, status: InvoiceStatus.PENDING, currency: Currency.EUR };
 
       (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -84,9 +84,8 @@ describe('InvoiceService', () => {
           await InvoiceService.createInvoice(invoiceDto);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
+          assert(error instanceof ResourceNotFoundError);
           assert.strictEqual(error.message, TAX_PROFILE_NOT_FOUND);
-          assert.strictEqual(error.statusCode, 404);
           return true;
         }
       );
@@ -144,7 +143,7 @@ describe('InvoiceService', () => {
       assert.strictEqual((InvoiceDAO.findInvoice as any).mock.callCount(), 1);
     });
 
-    it('should throw 404 error if invoice does not exists or does not belong to user', async () => {
+    it('should throw error if invoice does not exists or does not belong to user', async () => {
       const invoiceDto: ReadUniqueInvoiceDto = { id: 'invoice123', userId: 'user123' };
       const where: Prisma.InvoiceWhereUniqueInput = { id: invoiceDto.id, taxProfile: { userId: invoiceDto.userId } };
 
@@ -155,9 +154,8 @@ describe('InvoiceService', () => {
           await InvoiceService.findInvoice(invoiceDto);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
+          assert(error instanceof ResourceNotFoundError);
           assert.strictEqual(error.message, INVOICE_NOT_FOUND);
-          assert.strictEqual(error.statusCode, 404);
           return true;
         }
       );
@@ -188,7 +186,7 @@ describe('InvoiceService', () => {
       assert.strictEqual((InvoiceDAO.updateInvoice as any).mock.callCount(), 1);
     });
 
-    it('should throw 404 error if invoice was not found or does not belong to user', async () => {
+    it('should throw error if invoice was not found or does not belong to user', async () => {
       const invoiceDto: UpdateInvoiceDto = { id: 'invoice123', userId: 'user123', amount: 1000, status: "PENDING", currency: "EUR" };
 
       (InvoiceDAO.findInvoice as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -198,9 +196,8 @@ describe('InvoiceService', () => {
           await InvoiceService.updateInvoice(invoiceDto);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
+          assert(error instanceof ResourceNotFoundError);
           assert.strictEqual(error.message, INVOICE_NOT_FOUND);
-          assert.strictEqual(error.statusCode, 404);
           return true;
         }
       );
@@ -228,7 +225,7 @@ describe('InvoiceService', () => {
       assert.strictEqual((InvoiceDAO.deleteInvoice as any).mock.callCount(), 1);
     });
 
-    it('should throw 404 error if invoice was not found or does not belong to user', async () => {
+    it('should throw error if invoice was not found or does not belong to user', async () => {
       const readUniqueInvoiceDto: ReadUniqueInvoiceDto = { id: 'invoice123', userId: 'user123' };
 
       (InvoiceDAO.findInvoice as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -238,9 +235,8 @@ describe('InvoiceService', () => {
           await InvoiceService.deleteInvoice(readUniqueInvoiceDto);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
+          assert(error instanceof ResourceNotFoundError);
           assert.strictEqual(error.message, INVOICE_NOT_FOUND);
-          assert.strictEqual(error.statusCode, 404);
           return true;
         }
       );

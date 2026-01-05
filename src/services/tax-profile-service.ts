@@ -1,6 +1,6 @@
 import TaxProfileDAO from "../daos/tax-profile-dao.js";
 import { Prisma } from "../generated/prisma/client.js";
-import ReqValidationError from "../types/request-validation-error.js";
+import { ResourceNotFoundError } from "../types/error.js";
 import { CreateTaxProfileDTO, ReadUniqueTaxProfileDto, ReadTaxProfileOptionsDto, UpdateTaxProfileDto, TaxProfileResponseDTO } from "../types/tax-profile-dto.js";
 import { DEFAULT_SKIP, DEFAULT_TAKE, TAX_PROFILE_NOT_FOUND } from "../utils/constants.js";
 
@@ -85,7 +85,7 @@ class TaxProfileService {
     const where: Prisma.TaxProfileWhereUniqueInput = { id, userId };
     const taxProfile = await TaxProfileDAO.findTaxProfile(where);
     if (!taxProfile) {
-      throw new ReqValidationError({ message: TAX_PROFILE_NOT_FOUND, statusCode: 404 });
+      throw new ResourceNotFoundError(TAX_PROFILE_NOT_FOUND);
     }
     const taxProfileResponseDTO: TaxProfileResponseDTO = {
       id: taxProfile.id,

@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import request from 'supertest';
 import app from '../index.js';
 import prisma from '../utils/prisma.js';
-import { INVALID_EMAIL, LOGGED_IN, SIGNED_UP, UNAUTHORIZED, USER_DELETED, VALIDATION_ERROR, WRONG_PASSWORD } from '../utils/constants.js';
+import { INVALID_EMAIL, LOGGED_IN, SIGNED_UP, UNAUTHORIZED, USER_DELETED, VALIDATION_ERROR, INVALID_EMAIL_OR_PASSWORD, USER_ALREADY_REGISTERED } from '../utils/constants.js';
 import { ResponseUserDTO } from '../types/user-dto.js';
 
 describe('Integration Tests: User', () => {
@@ -44,13 +44,14 @@ describe('Integration Tests: User', () => {
   });
 
   it('POST /user/signup should return 409 for duplicate email', async () => {
-    await request(app)
+    const response = await request(app)
       .post('/user/signup')
       .send({
         email: testUser.email,
         password: testUser.password
       })
       .expect(409);
+    assert.strictEqual(response.body.message, USER_ALREADY_REGISTERED);
   });
 
   it('POST /user/signup should return 422 for invalid email and password', async () => {
@@ -102,7 +103,7 @@ describe('Integration Tests: User', () => {
         password: 'wrong-password'
       })
       .expect(401);
-    assert.strictEqual(response.body.message, WRONG_PASSWORD);
+    assert.strictEqual(response.body.message, INVALID_EMAIL_OR_PASSWORD);
   });
 
   it('PUT /user should update user', async () => {
@@ -189,14 +190,6 @@ describe('Integration Tests: User', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .expect(200);
     assert.strictEqual(response.body.message, USER_DELETED);
-
-    await request(app)
-      .post('/user/login')
-      .send({
-        email: testUser.email,
-        password: testUser.password
-      })
-      .expect(404);
   });
 
   it('DELETE /user should return 401 with invalid token', async () => {

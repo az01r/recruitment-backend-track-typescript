@@ -121,9 +121,7 @@ router.post('/signup', signupValidation, validateRequest, UserController.signup)
  *                 jwt:
  *                   type: string
  *       401:
- *         description: Unauthorized
- *       404:
- *         description: E-Mail not registered yet.
+ *         description: Invalid email or password
  *       422:
  *         description: Validation error
  */

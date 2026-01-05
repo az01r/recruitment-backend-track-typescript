@@ -6,8 +6,8 @@ import UserService from "./user-service.js";
 import { Prisma, User } from '../generated/prisma/client.js';
 import { CreateUserDTO, ResponseUserDTO, UpdateUserDTO } from '../types/user-dto.js';
 import UserDAO from '../daos/user-dao.js';
-import ReqValidationError from '../types/request-validation-error.js';
-import { EMAIL_NOT_REGISTERED, USER_ALREADY_REGISTERED, USER_NOT_FOUND, WRONG_PASSWORD } from '../utils/constants.js';
+import { ConflictError, ResourceNotFoundError, UnauthorizedError } from '../types/error.js';
+import { INVALID_EMAIL_OR_PASSWORD, USER_ALREADY_REGISTERED, USER_NOT_FOUND } from '../utils/constants.js';
 
 mock.method(bcrypt, 'hash', () => 'hashed_password');
 mock.method(bcrypt, 'compare');
@@ -51,7 +51,7 @@ describe('UserService', () => {
       assert.strictEqual((jwt.sign as any).mock.callCount(), 1);
     });
 
-    it('should throw 409 error if user already exists', async () => {
+    it('should throw error if user already exists', async () => {
       const userDto: CreateUserDTO = { email: 'test@test.com', password: 'testtest' };
       const alreadyExistingUser: User = { id: '1', email: 'test@test.com', password: 'hashed_password', firstName: null, lastName: null, birthDate: null, createdAt: new Date('2025-01-01T00:00:00.000Z'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
 
@@ -62,9 +62,8 @@ describe('UserService', () => {
           await UserService.signup(userDto);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
+          assert(error instanceof ConflictError);
           assert.strictEqual(error.message, USER_ALREADY_REGISTERED);
-          assert.strictEqual(error.statusCode, 409);
           return true;
         }
       );
@@ -93,7 +92,7 @@ describe('UserService', () => {
       assert.strictEqual((jwt.sign as any).mock.callCount(), 1);
     });
 
-    it('should throw 404 error if user is not found', async () => {
+    it('should throw error if user is not found', async () => {
       const userDto: CreateUserDTO = { email: 'test@test.com', password: 'testtest' };
 
       (UserDAO.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -103,9 +102,8 @@ describe('UserService', () => {
           await UserService.login(userDto);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
-          assert.strictEqual(error.message, EMAIL_NOT_REGISTERED);
-          assert.strictEqual(error.statusCode, 404);
+          assert(error instanceof UnauthorizedError);
+          assert.strictEqual(error.message, INVALID_EMAIL_OR_PASSWORD);
           return true;
         }
       );
@@ -114,7 +112,7 @@ describe('UserService', () => {
       assert.strictEqual((jwt.sign as any).mock.callCount(), 0);
     });
 
-    it('should throw 401 error if password is not correct', async () => {
+    it('should throw error if password is not correct', async () => {
       const userDto: CreateUserDTO = { email: 'test@test.com', password: 'testtest' };
       const user: User = { id: '1', email: 'test@test.com', password: 'hashed_password', firstName: null, lastName: null, birthDate: null, createdAt: new Date('2025'), updatedAt: new Date('2025-01-01T00:00:00.000Z') };
 
@@ -126,9 +124,8 @@ describe('UserService', () => {
           await UserService.login(userDto);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
-          assert.strictEqual(error.message, WRONG_PASSWORD);
-          assert.strictEqual(error.statusCode, 401);
+          assert(error instanceof UnauthorizedError);
+          assert.strictEqual(error.message, INVALID_EMAIL_OR_PASSWORD);
           return true;
         }
       );
@@ -154,7 +151,7 @@ describe('UserService', () => {
       assert.strictEqual((UserDAO.findUser as any).mock.callCount(), 1);
     });
 
-    it('should throw error 404 if user was not found', async () => {
+    it('should throw error if user was not found', async () => {
       const userId = '1';
 
       (UserDAO.findUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -164,9 +161,8 @@ describe('UserService', () => {
           await UserService.getUser(userId);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
+          assert(error instanceof ResourceNotFoundError);
           assert.strictEqual(error.message, USER_NOT_FOUND);
-          assert.strictEqual(error.statusCode, 404);
           return true;
         }
       );
@@ -201,7 +197,7 @@ describe('UserService', () => {
       assert.strictEqual((UserDAO.updateUser as any).mock.callCount(), 1);
     });
 
-    it('should throw error 404 if user was not found', async () => {
+    it('should throw error if user was not found', async () => {
       const userId = '1';
       const userDto: UpdateUserDTO = { id: userId, email: 'test@test.com', password: 'testtest', firstName: 'updated', lastName: 'updated', birthDate: '2025-12-31T00:00:00.000Z' };
 
@@ -212,9 +208,8 @@ describe('UserService', () => {
           await UserService.updateUser(userDto);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
+          assert(error instanceof ResourceNotFoundError);
           assert.strictEqual(error.message, USER_NOT_FOUND);
-          assert.strictEqual(error.statusCode, 404);
           return true;
         }
       );
@@ -237,7 +232,7 @@ describe('UserService', () => {
       assert.strictEqual((UserDAO.deleteUser as any).mock.callCount(), 1);
     });
 
-    it('should throw error 404 if user was not found', async () => {
+    it('should throw error if user was not found', async () => {
       const userId = '1';
 
       (UserDAO.deleteUser as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -247,9 +242,8 @@ describe('UserService', () => {
           await UserService.deleteUser(userId);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
+          assert(error instanceof ResourceNotFoundError);
           assert.strictEqual(error.message, USER_NOT_FOUND);
-          assert.strictEqual(error.statusCode, 404);
           return true;
         }
       );

@@ -2,7 +2,7 @@ import { describe, it, mock, beforeEach, after } from 'node:test';
 import assert from 'node:assert';
 import TaxProfileService from "./tax-profile-service.js";
 import { Prisma, TaxProfile } from '../generated/prisma/client.js';
-import ReqValidationError from '../types/request-validation-error.js';
+import { ResourceNotFoundError } from '../types/error.js';
 import { TAX_PROFILE_NOT_FOUND } from '../utils/constants.js';
 import TaxProfileDAO from '../daos/tax-profile-dao.js';
 import { CreateTaxProfileDTO, ReadTaxProfileOptionsDto, ReadUniqueTaxProfileDto, TaxProfileResponseDTO, UpdateTaxProfileDto } from '../types/tax-profile-dto.js';
@@ -98,7 +98,7 @@ describe('TaxProfileService', () => {
       assert.strictEqual((TaxProfileDAO.findTaxProfile as any).mock.callCount(), 1);
     });
 
-    it('should throw 404 error if no tax profile was found', async () => {
+    it('should throw error if no tax profile was found', async () => {
       const taxProfileDto: ReadUniqueTaxProfileDto = { id: '1', userId: '1' };
 
       (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -108,9 +108,8 @@ describe('TaxProfileService', () => {
           await TaxProfileService.findTaxProfile(taxProfileDto);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
+          assert(error instanceof ResourceNotFoundError);
           assert.strictEqual(error.message, TAX_PROFILE_NOT_FOUND);
-          assert.strictEqual(error.statusCode, 404);
           return true;
         }
       );
@@ -139,7 +138,7 @@ describe('TaxProfileService', () => {
       assert.strictEqual((TaxProfileDAO.findTaxProfile as any).mock.callCount(), 1);
     });
 
-    it('should throw error 404 if tax profile was not found or does not belong to user', async () => {
+    it('should throw error if tax profile was not found or does not belong to user', async () => {
       const taxProfileDto: ReadUniqueTaxProfileDto = { id: '1', userId: '1' };
 
       (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -149,9 +148,8 @@ describe('TaxProfileService', () => {
           await TaxProfileService.updateTaxProfile(taxProfileDto);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
+          assert(error instanceof ResourceNotFoundError);
           assert.strictEqual(error.message, TAX_PROFILE_NOT_FOUND);
-          assert.strictEqual(error.statusCode, 404);
           return true;
         }
       );
@@ -178,7 +176,7 @@ describe('TaxProfileService', () => {
       assert.strictEqual((TaxProfileDAO.deleteTaxProfile as any).mock.callCount(), 1);
     });
 
-    it('should throw error 404 if tax profile was not found or does not belong to user', async () => {
+    it('should throw error if tax profile was not found or does not belong to user', async () => {
       const taxProfileDto: ReadUniqueTaxProfileDto = { id: '1', userId: '1' };
 
       (TaxProfileDAO.findTaxProfile as any).mock.mockImplementationOnce(() => Promise.resolve(null));
@@ -188,9 +186,8 @@ describe('TaxProfileService', () => {
           await TaxProfileService.deleteTaxProfile(taxProfileDto);
         },
         (error: any) => {
-          assert(error instanceof ReqValidationError);
+          assert(error instanceof ResourceNotFoundError);
           assert.strictEqual(error.message, TAX_PROFILE_NOT_FOUND);
-          assert.strictEqual(error.statusCode, 404);
           return true;
         }
       );

@@ -1,9 +1,9 @@
 import { Prisma } from "../generated/prisma/client.js";
 import UserDAO from "../daos/user-dao.js";
-import ReqValidationError from "../types/request-validation-error.js";
+import { ConflictError, ResourceNotFoundError, UnauthorizedError } from "../types/error.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { EMAIL_NOT_REGISTERED, USER_ALREADY_REGISTERED, USER_NOT_FOUND, WRONG_PASSWORD } from "../utils/constants.js";
+import { INVALID_EMAIL_OR_PASSWORD, USER_ALREADY_REGISTERED, USER_NOT_FOUND } from "../utils/constants.js";
 import { CreateUserDTO, LoginUserDTO, ResponseUserDTO, UpdateUserDTO } from "../types/user-dto.js";
 
 class UserService {
@@ -18,7 +18,7 @@ class UserService {
     const where: Prisma.UserWhereUniqueInput = { email };
     const existingUser = await UserDAO.findUser(where);
     if (existingUser) {
-      throw new ReqValidationError({ message: USER_ALREADY_REGISTERED, statusCode: 409 });
+      throw new ConflictError(USER_ALREADY_REGISTERED);
     }
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = await UserDAO.createUser({ email, password: hashedPassword });
@@ -30,11 +30,11 @@ class UserService {
     const where: Prisma.UserWhereUniqueInput = { email };
     const user = await UserDAO.findUser(where);
     if (!user) {
-      throw new ReqValidationError({ message: EMAIL_NOT_REGISTERED, statusCode: 404 });
+      throw new UnauthorizedError(INVALID_EMAIL_OR_PASSWORD);
     }
     const isEqual = await bcrypt.compare(password, user.password!);
     if (!isEqual) {
-      throw new ReqValidationError({ message: WRONG_PASSWORD, statusCode: 401 });
+      throw new UnauthorizedError(INVALID_EMAIL_OR_PASSWORD);
     }
     const token = this.jwtSign(user.id);
     return token;
@@ -44,7 +44,7 @@ class UserService {
     const where: Prisma.UserWhereUniqueInput = { id };
     const user = await UserDAO.findUser(where);
     if (!user) {
-      throw new ReqValidationError({ message: USER_NOT_FOUND, statusCode: 404 });
+      throw new ResourceNotFoundError(USER_NOT_FOUND);
     }
     const result: ResponseUserDTO = {
       id: user.id,
@@ -67,7 +67,7 @@ class UserService {
     const where: Prisma.UserWhereUniqueInput = { id: userDto.id };
     const user = await UserDAO.updateUser(where, data);
     if (!user) {
-      throw new ReqValidationError({ message: USER_NOT_FOUND, statusCode: 404 });
+      throw new ResourceNotFoundError(USER_NOT_FOUND);
     }
     const result: ResponseUserDTO = {
       id: user.id,
@@ -85,7 +85,7 @@ class UserService {
     const where: Prisma.UserWhereUniqueInput = { id };
     const user = await UserDAO.deleteUser(where);
     if (!user) {
-      throw new ReqValidationError({ message: USER_NOT_FOUND, statusCode: 404 });
+      throw new ResourceNotFoundError(USER_NOT_FOUND);
     }
   }
 }
