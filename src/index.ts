@@ -11,6 +11,7 @@ import invoiceRouter from "./routers/invoice-router.js";
 import swaggerDocument from "./utils/swagger.js";
 import logger from "./utils/logger.js";
 import requestLogger from "./middlewares/request-logger.js";
+import { fileURLToPath } from "node:url";
 
 const app = express();
 
@@ -32,7 +33,7 @@ app.use(notFoundRouter);
 
 app.use(errorRouter);
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   app.listen(process.env.BACKEND_PORT || 3000, () => {
     logger.info(`Server started on port ${process.env.BACKEND_PORT || 3000}`);
     logger.info(`Swagger docs available at http://localhost:${process.env.BACKEND_PORT || 3000}/api-docs`);
