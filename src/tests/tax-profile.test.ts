@@ -5,7 +5,7 @@ import app from '../index.js';
 import prisma from '../utils/prisma.js';
 import { TAX_PROFILE_DELETED, TAX_PROFILE_NOT_FOUND, UNAUTHORIZED, VALIDATION_ERROR } from '../utils/constants.js';
 import { CreateTaxProfileDTO } from '../types/tax-profile-dto.js';
-
+import { logger } from '../utils/logger.js';
 
 describe('Integration Tests: Tax Profile', () => {
   const testUser = {
@@ -32,6 +32,7 @@ describe('Integration Tests: Tax Profile', () => {
 
   before(async () => {
     try {
+      logger.level = 'silent';
       const response = await request(app)
         .post('/user/signup')
         .send({
@@ -54,6 +55,7 @@ describe('Integration Tests: Tax Profile', () => {
 
   after(async () => {
     try {
+      logger.level = process.env.LOG_LEVEL || 'info';
       await prisma.taxProfile.deleteMany({
         where: { userId }
       });
@@ -75,7 +77,6 @@ describe('Integration Tests: Tax Profile', () => {
       .expect(201);
 
     assert.ok(response.body.taxProfile);
-    console.log(response.body.taxProfile);
     assert.strictEqual(response.body.taxProfile.userId, testTaxProfile.userId);
     assert.strictEqual(response.body.taxProfile.legalName, testTaxProfile.legalName);
     assert.strictEqual(response.body.taxProfile.vatNumber, testTaxProfile.vatNumber);

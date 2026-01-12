@@ -1,10 +1,11 @@
-import { describe, it, after } from 'node:test';
+import { describe, it, after, before } from 'node:test';
 import assert from 'node:assert';
 import request from 'supertest';
 import app from '../index.js';
 import prisma from '../utils/prisma.js';
 import { INVALID_EMAIL, LOGGED_IN, SIGNED_UP, UNAUTHORIZED, USER_DELETED, VALIDATION_ERROR, INVALID_EMAIL_OR_PASSWORD, USER_ALREADY_REGISTERED } from '../utils/constants.js';
 import { ResponseUserDTO } from '../types/user-dto.js';
+import logger from '../utils/logger.js';
 
 describe('Integration Tests: User', () => {
   const testUser = {
@@ -18,8 +19,17 @@ describe('Integration Tests: User', () => {
 
   let expectedUser: ResponseUserDTO;
 
+  before(() => {
+    try {
+      logger.level = 'silent';
+    } catch (error) {
+      console.error('Setup failed:', error);
+    }
+  });
+
   after(async () => {
     try {
+      logger.level = process.env.LOG_LEVEL || 'info';
       await prisma.user.deleteMany({
         where: { email: { endsWith: '@example.com' } }
       });

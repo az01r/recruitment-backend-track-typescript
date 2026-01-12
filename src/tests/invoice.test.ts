@@ -5,6 +5,7 @@ import app from '../index.js';
 import prisma from '../utils/prisma.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { INVOICE_DELETED, INVOICE_NOT_FOUND, TAX_PROFILE_NOT_FOUND, UNAUTHORIZED, VALIDATION_ERROR } from '../utils/constants.js';
+import { logger } from '../utils/logger.js';
 
 describe('Integration Tests: Invoice', () => {
   const testUser = {
@@ -33,6 +34,7 @@ describe('Integration Tests: Invoice', () => {
 
   before(async () => {
     try {
+      logger.level = 'silent';
       const response = await request(app)
         .post('/user/signup')
         .send({
@@ -46,7 +48,7 @@ describe('Integration Tests: Invoice', () => {
         .get('/user')
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
-      userId = userResponse.body.id;
+      userId = userResponse.body.user.id;
       const taxProfileResponse = await request(app)
         .post('/tax-profile')
         .set('Authorization', `Bearer ${authToken}`)
@@ -60,6 +62,7 @@ describe('Integration Tests: Invoice', () => {
 
   after(async () => {
     try {
+      logger.level = process.env.LOG_LEVEL || 'info';
       await prisma.invoice.deleteMany({
         where: {
           taxProfile: { userId }
