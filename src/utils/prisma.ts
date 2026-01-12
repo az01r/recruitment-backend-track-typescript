@@ -12,6 +12,7 @@ const adapter = new PrismaMariaDb({
   ssl: process.env.SSL === 'true',
 });
 
+// global.globalPrisma is used to keep the same instance through hot reloads
 const prismaClientSingleton = global.globalPrisma || new PrismaClient({ adapter });
 if (process.env.NODE_ENV !== 'production') {
   global.globalPrisma = prismaClientSingleton;
