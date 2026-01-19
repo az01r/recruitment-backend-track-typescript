@@ -5,7 +5,7 @@ import app from '../index.js';
 import prisma from '../utils/prisma.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { INVOICE_DELETED, INVOICE_NOT_FOUND, TAX_PROFILE_NOT_FOUND, UNAUTHORIZED, VALIDATION_ERROR } from '../utils/constants.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 describe('Integration Tests: Invoice', () => {
   const testUser = {
@@ -167,8 +167,6 @@ describe('Integration Tests: Invoice', () => {
       .expect(401);
     assert.strictEqual(response2.body.message, UNAUTHORIZED);
   });
-
-
 
   it('GET /invoice should return 422 for invalid query params', async () => {
     const response = await request(app)

@@ -5,7 +5,7 @@ import app from '../index.js';
 import prisma from '../utils/prisma.js';
 import { TAX_PROFILE_DELETED, TAX_PROFILE_NOT_FOUND, UNAUTHORIZED, VALIDATION_ERROR } from '../utils/constants.js';
 import { CreateTaxProfileDTO } from '../types/tax-profile-dto.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 describe('Integration Tests: Tax Profile', () => {
   const testUser = {
